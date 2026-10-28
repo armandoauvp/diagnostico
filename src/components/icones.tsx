@@ -1,0 +1,45 @@
+"use client";
+
+import {
+  Bank,
+  ChartBar,
+  ChartLineUp,
+  ChartPieSlice,
+  Coins,
+  Compass,
+  CreditCard,
+  GlobeHemisphereWest,
+  GraduationCap,
+  HouseLine,
+  Path,
+  Plant,
+  Smiley,
+  TreeStructure,
+  TrendUp,
+  User,
+  UsersThree,
+  type Icon,
+} from "@phosphor-icons/react";
+
+/** Ícone de cada opção de resposta (Phosphor, como no design system). */
+export const ICONES_OPCAO: Record<string, Icon> = {
+  crescer: ChartLineUp,
+  renda: Coins,
+  ambos: Path,
+  dividas: CreditCard,
+  comprar_imovel: HouseLine,
+  proteger_familia: UsersThree,
+  nenhum: Smiley,
+  rentabilidade: TrendUp,
+  diversificar: ChartPieSlice,
+  renda_ativos: Coins,
+  exterior: GlobeHemisphereWest,
+  sucessao: TreeStructure,
+  sozinho: User,
+  consultoria: Bank,
+  comecando: Plant,
+  iniciante: Plant,
+  perdido: Compass,
+  intermediario: ChartBar,
+  avancado: GraduationCap,
+};

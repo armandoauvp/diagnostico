@@ -1,0 +1,1343 @@
+<!-- Funil de diagnóstico AUVP — v6 (claro, autoridade prescritiva). Self-contained. -->
+<!-- CONFIGURAR ANTES DE PUBLICAR: WHATSAPP_NUMBER, SALESFORCE_WEBHOOK, PRESS (links reais) e SPECIALIST (foto/nome). -->
+<meta charset="utf-8">
+<script type="b5e5da3627c90911240c9fe4-text/javascript">document.documentElement.className+=' js-loading';</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUVP — Diagnóstico patrimonial</title>
+<style>
+  :root{
+    --bg:#F7F4EC; --card:#FFFFFF; --line:#E5DFD2; --line-soft:#EFEAE0;
+    --ink:#1B1610; --ink-dim:#5C5546; --ink-faint:#7A7260;
+    --gold:#EFBF4F; --gold-deep:#8F7427; --gold-line:rgba(143,116,39,.35); --gold-glow:rgba(239,191,79,.10);
+    --dark:#0A0907; --loss:#A33B2E; --pos:#1E7F4F;
+    --radius:14px; --maxw:600px;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0 0 64px}
+
+  /* faixa escura de continuidade com o site */
+  .bar{width:100%;background:var(--dark);display:flex;justify-content:center;padding:15px 16px;margin-bottom:28px}
+  .bar-in{width:100%;max-width:var(--maxw);display:flex;align-items:center;justify-content:space-between}
+  .logo{height:25px;width:auto;color:var(--gold);display:block}
+  .logo path{fill:currentColor}
+  .stepno{font-size:11.5px;letter-spacing:.22em;color:#A39B89;font-variant-numeric:tabular-nums}
+
+  .wrap{width:100%;max-width:var(--maxw);padding:0 16px}
+  .progress{height:2px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:26px}
+  .progress > i{display:block;height:100%;width:0;background:var(--gold-deep);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:34px 30px;box-shadow:0 1px 2px rgba(27,22,16,.04),0 8px 28px rgba(27,22,16,.05)}
+  @media(max-width:480px){.card{padding:28px 20px} .readout .num{font-size:clamp(28px,9.5vw,46px)} .readout .cur{font-size:19px} h1{font-size:24px}}
+  .step{display:none;animation:fade .42s ease both}
+  .step.active{display:block}
+  .js-loading .step{display:none!important}
+  .js-loading .step[data-id="objetivo"]{display:block!important}
+  html.js-loading .sticky{display:none!important}
+  @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.step{animation:none}.progress>i{transition:none}}
+
+  .eyebrow{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:14px}
+  h1{font-family:var(--serif);font-size:28px;line-height:1.2;margin:0 0 9px;font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--ink-dim);font-size:15px;line-height:1.6;margin:0 0 24px}
+
+  .trust{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px;padding:0 8px;text-align:center;min-height:20px}
+  .trust .tdot{width:4px;height:4px;border-radius:50%;background:var(--gold-deep);flex:0 0 auto}
+  .trust span{font-size:13px;color:var(--ink-faint);letter-spacing:.01em;line-height:1.5}
+  .trust b{color:var(--ink-dim);font-weight:600}
+
+  .opts{display:grid;gap:10px}
+  .opt{appearance:none;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);color:var(--ink);
+       padding:17px 18px;border-radius:12px;font-size:16px;font-family:inherit;cursor:pointer;transition:.18s;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  @media(hover:hover){
+  .opt:hover{border-color:var(--gold-line);background:var(--gold-glow)}
+  .stepbtn:hover{border-color:var(--gold-line);color:var(--ink)}
+  .btn-primary:hover{background:#f4cd6e}
+  .btn-ghost:hover{color:var(--ink);border-color:var(--gold-line)}
+  .wa:hover{background:#1FB457}
+  .press a:hover{color:var(--ink-dim);border-color:var(--line)}
+  }
+  .opt:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+  .opt.sel{border-color:var(--gold-deep);background:var(--gold-glow)}
+  .opt .txt{display:flex;flex-direction:column}
+  .opt small{color:var(--ink-faint);font-size:13px;margin-top:3px}
+  .opt .chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex:0 0 auto;display:grid;place-items:center;transition:.18s}
+  .opt.sq .chk{border-radius:5px}
+  .opt.sel .chk{border-color:var(--gold-deep);background:var(--gold-deep)}
+  .opt.sel .chk::after{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+  .opt.sq.sel .chk::after{border-radius:1px}
+
+  .slider{margin:6px 0 4px}
+  .readout{display:flex;align-items:baseline;justify-content:center;gap:7px;margin-bottom:20px}
+  .readout .cur{font-family:var(--serif);font-size:25px;color:var(--ink-faint)}
+  .readout .num{font-family:var(--serif);font-size:46px;font-weight:600;color:var(--ink);background:transparent;border:none;text-align:center;width:auto;max-width:100%;padding:0;letter-spacing:-.01em;-webkit-appearance:none}
+  input.num:focus{outline:none}
+  .readout .plus{font-family:var(--serif);font-size:27px;color:var(--ink-faint)}
+  .readout .unit{font-family:var(--serif);font-size:23px;color:var(--ink-faint)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;cursor:pointer;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--gold-deep) var(--fill,0%),var(--line) var(--fill,0%))}
+  input[type=range]::-moz-range-track{height:3px;border-radius:3px;background:var(--line)}
+  input[type=range]::-moz-range-progress{height:3px;background:var(--gold-deep)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);border:2px solid #fff;margin-top:-9.5px;box-shadow:0 1px 4px rgba(27,22,16,.25);transition:transform .15s}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border:2px solid #fff;border-radius:50%;background:var(--gold);box-shadow:0 1px 4px rgba(27,22,16,.25)}
+  input[type=range]:active::-webkit-slider-thumb{transform:scale(1.15)}
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--gold-line)}
+  .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-faint);margin-top:8px;letter-spacing:.03em}
+  .srow{display:flex;align-items:center;gap:12px}
+  .srow input[type=range]{flex:1;min-width:0}
+  .stepbtn{flex:0 0 auto;width:52px;height:52px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink-dim);font-size:26px;font-weight:600;cursor:pointer;transition:.15s;line-height:1;font-family:var(--sans)}
+  .stepbtn:active{transform:scale(.95)}
+  .stepbtn:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+  .hint{text-align:center;font-size:12.5px;color:var(--ink-faint);margin-top:10px}
+  @media(pointer:coarse){
+    input[type=range]{height:56px}
+    input[type=range]::-webkit-slider-thumb{width:28px;height:28px;margin-top:-12.5px}
+    input[type=range]::-moz-range-thumb{width:28px;height:28px}
+    .stepbtn{width:56px;height:56px}
+  }
+
+  .field{margin-top:4px}
+  .field + .field{margin-top:12px}
+  input.text{width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--ink);font-size:17px;font-family:var(--sans);padding:16px 17px}
+  input.text::placeholder{color:var(--ink-faint)}
+  input.text:focus{outline:none;border-color:var(--gold-deep)}
+  input.text.ok{border-color:var(--gold-deep)}
+  input.text.err{border-color:var(--loss)}
+  .telrow{display:flex;gap:8px}
+  .telcc{position:relative;flex:0 0 auto}
+  .telcc select{appearance:none;-webkit-appearance:none;height:100%;background:var(--card);border:1.5px solid var(--line);border-radius:12px;color:var(--ink);font-family:var(--sans);font-size:17px;padding:16px 30px 16px 14px;cursor:pointer}
+  .telcc select:focus{outline:none;border-color:var(--gold-deep)}
+  .telcc::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--ink-faint);pointer-events:none;font-size:12px}
+  .telrow input{flex:1;min-width:0}
+  .fieldnote{font-size:12px;color:var(--loss);margin-top:6px;display:none}
+  .fieldnote.show{display:block}
+  .guar{display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:14px 15px;background:#FBF9F4;border:1px solid var(--line-soft);border-radius:11px}
+  .guar svg{flex:0 0 auto;margin-top:1px}
+  .guar span{font-size:13px;color:var(--ink-dim);line-height:1.6}
+  .guar b{color:var(--ink)}
+
+  .nav{display:flex;gap:10px;margin-top:28px}
+  .btn{flex:1;appearance:none;border:none;font-family:inherit;font-weight:700;font-size:15.5px;border-radius:12px;padding:16px;cursor:pointer;transition:.18s;letter-spacing:.01em}
+  .btn-primary{background:var(--gold);color:#1a1404;box-shadow:0 1px 3px rgba(27,22,16,.18)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn-ghost{flex:0 0 auto;background:transparent;border:1.5px solid var(--line);color:var(--ink-dim);padding:16px 19px}
+  .btn:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+
+  .hero{position:relative;text-align:center;padding:30px 18px 26px;background:linear-gradient(168deg,#13190F,#0A0907 72%);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(27,22,16,.16)}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(440px 230px at 50% 16%,rgba(239,191,79,.17),transparent 70%);pointer-events:none}
+  .hero > *{position:relative}
+  .hero .plabel{color:var(--gold);border-color:rgba(239,191,79,.4)}
+  .hero .label{color:#A39B89;font-size:13px;letter-spacing:.03em}
+  .hero .big{font-family:var(--serif);font-size:clamp(34px,11vw,50px);font-weight:600;letter-spacing:-.02em;margin:8px 0 2px;line-height:1.02;color:#F4EFE3}
+  .hero .second{margin-top:18px;padding-top:18px;border-top:1px solid rgba(242,237,226,.13)}
+  .hero .second .big{font-size:clamp(24px,7vw,33px);color:#C9A459}
+  .hero .note{color:#9A937F;font-size:13px;margin-top:12px;line-height:1.6}
+  .hero .note b{color:#D8CCAE;font-weight:600}
+  .hero .wait{color:#E58D77}
+  .wait{font-size:13.5px;color:var(--loss);margin:14px 0 0;text-align:center;line-height:1.55}
+  .wait b{font-weight:700}
+  .chart{margin:22px 0 0}
+  .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  @media(max-width:480px){.cmp{gap:9px}}
+  .cmp-col{border:1.5px solid var(--line);border-radius:13px;padding:17px 14px;text-align:center}
+  .cmp-col.com{border-color:rgba(30,127,79,.5);background:linear-gradient(172deg,rgba(30,127,79,.12),rgba(30,127,79,.03));box-shadow:0 4px 16px rgba(30,127,79,.08)}
+  .cmp-col.sem{background:#FBF9F4}
+  .com .cmp-head::before{content:"✓ "}
+  .cmp-head{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-bottom:13px}
+  .com .cmp-head{color:var(--pos)} .sem .cmp-head{color:var(--ink-faint)}
+  .cmp-num{font-family:var(--serif);font-size:clamp(19px,5.2vw,26px);font-weight:600;line-height:1.05}
+  .com .cmp-num{color:var(--pos)} .sem .cmp-num{color:var(--ink-dim)}
+  .cmp-lbl{font-size:11.5px;color:var(--ink-faint);margin-top:5px}
+  .cmp-row + .cmp-row{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+  .cmp-diff{margin-top:13px;text-align:center;font-size:14px;color:var(--pos);font-weight:700}
+  .cmp-diff b{font-family:var(--serif);font-size:17px}
+  .chart svg{width:100%;height:auto;display:block}
+  .legend{display:flex;gap:18px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-dim)}
+  .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+  .legend i.dash{background:repeating-linear-gradient(90deg,#B9B19E 0 5px,transparent 5px 9px)}
+  .split{display:flex;height:28px;border-radius:8px;overflow:hidden;margin-bottom:8px}
+  .split > div{height:100%}
+  .splitlbl{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--ink-dim);margin-bottom:18px;flex-wrap:wrap}
+  .splitlbl b{color:var(--ink)}
+  .rule{height:1px;background:var(--line-soft);margin:28px 0}
+  .rule.g{background:var(--gold-line)}
+  .secttl{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin:0 0 14px}
+  .leadin{font-family:var(--serif);font-size:17.5px;line-height:1.55;color:var(--ink);margin:0 0 4px}
+  .leadin em{color:var(--gold-deep);font-style:normal}
+  /* blocos visuais do resultado */
+  .rblock{border-radius:16px;padding:20px 18px;margin:14px 0}
+  .rblock-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .rblock-h .ic{width:32px;height:32px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center}
+  .rblock-h .tt{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--ink-dim)}
+  .rb-prova{background:linear-gradient(168deg,#F2F8F4,#FBFCFB);border:1px solid #D8EBE0}
+  .rb-prova .ic{background:rgba(30,127,79,.12)}
+  .rb-num{background:#FBF9F4;border:1px solid var(--line-soft)}
+  .rb-num .ic{background:rgba(143,116,39,.12)}
+  .rb-plano{background:linear-gradient(168deg,#FBF7EE,#FFFDF9);border:1px solid var(--gold-line)}
+  .rb-plano .ic{background:rgba(239,191,79,.2)}
+  .rb-cta{background:linear-gradient(168deg,#13190F,#0A0907 72%);border:1px solid #2A261D;color:#F2EDE2}
+  .rb-cta .tt{color:#C9A459}
+  .rb-cta .ic{background:rgba(239,191,79,.16)}
+  .rb-cta .secttl{color:#9A937F}
+  .rb-cta .spec{background:rgba(255,255,255,.05);border-color:rgba(242,237,226,.12)}
+  .rb-cta .spec .sname{color:#F2EDE2}
+  .rb-cta .wanote{color:#9A937F}.rb-cta .wanote b{color:#D8CCAE}
+  .rblock .secttl{margin-top:0}
+
+  .stat-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line-soft);gap:12px}
+  .stat-row:last-child{border-bottom:none}
+  .stat-row .k{color:var(--ink-dim);font-size:14px}
+  .stat-row .v{font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+  .v.gold{color:var(--ink)}
+  .v.loss{color:var(--loss)}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+  @media(max-width:480px){.kpis{gap:8px}}
+  .kpi{border-radius:14px;padding:16px 15px;border:1px solid var(--line)}
+  .kpi.k-grow{background:linear-gradient(160deg,rgba(30,127,79,.13),rgba(30,127,79,.03));border-color:rgba(30,127,79,.3)}
+  .kpi.k-income{background:linear-gradient(160deg,rgba(239,191,79,.16),rgba(239,191,79,.04));border-color:var(--gold-line)}
+  .kpi.k-juros{background:#FBF9F4}
+  .kpi.k-wait{background:linear-gradient(160deg,rgba(163,59,46,.09),transparent);border-color:rgba(163,59,46,.25)}
+  .kpi .klbl{font-size:12px;color:var(--ink-faint);line-height:1.35;display:flex;align-items:center;gap:6px}
+  .kpi .kval{font-family:var(--serif);font-size:clamp(20px,5.6vw,27px);font-weight:600;margin-top:7px;line-height:1.05;color:var(--ink)}
+  .kpi.k-grow .kval{color:var(--pos)} .kpi.k-wait .kval{color:var(--loss)}
+  .kpi .ksub{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+  .statline{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-dim);padding:7px 2px;border-bottom:1px solid var(--line-soft)}
+  .statline:last-child{border:none}
+  .statline b{color:var(--ink);font-weight:600}
+
+  .path{padding:21px 0;border-top:1px solid var(--line-soft)}
+  .path:first-of-type{border-top:none;padding-top:4px}
+  .path .pstep{display:block;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:5px}
+  .path .pname{font-family:var(--serif);font-size:19px;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .path .pname .tagword{font-family:var(--sans);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;white-space:nowrap}
+  .path .pcopy{color:var(--ink-dim);font-size:14.5px;line-height:1.68;margin-top:9px}
+  .path .pcopy b{color:var(--ink);font-weight:700}
+  .path .pguar{display:inline-flex;align-items:center;gap:7px;margin-top:11px;font-size:12.5px;color:var(--gold-deep);font-weight:600}
+
+  .callout{border:1.5px solid var(--gold-line);background:var(--gold-glow);border-radius:13px;padding:21px;margin-top:6px;margin-bottom:14px}
+  .callout .ctitle{font-family:var(--serif);font-size:19px;color:var(--ink);margin:0 0 8px;line-height:1.3}
+  .callout .ccopy{color:var(--ink-dim);font-size:14.5px;line-height:1.68}
+
+  .spec{display:flex;gap:13px;align-items:center;margin-top:22px;padding:15px 16px;background:#FBF9F4;border:1px solid var(--line-soft);border-radius:13px}
+  .spec img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 auto}
+  .spec .sname{font-size:14.5px;color:var(--ink);font-weight:700}
+  .spec .srole{font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+
+  .wa{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#22C35E;color:#fff;border:none;border-radius:13px;padding:18px;font-family:inherit;font-weight:700;font-size:16px;cursor:pointer;text-decoration:none;transition:.18s;margin-top:14px;box-shadow:0 1px 3px rgba(27,22,16,.18)}
+  .wa svg{flex:0 0 auto}
+  .wa svg [stroke]{stroke:#fff}
+  .wa svg [fill]{fill:#fff}
+  .wanote{text-align:center;font-size:12.5px;color:var(--ink-faint);margin-top:11px;line-height:1.55}
+  .wanote b{color:var(--ink-dim)}
+  details.pstepd{border:1.5px solid var(--line);border-radius:13px;background:var(--card);margin-bottom:10px}
+  details.pstepd[open]{border-color:var(--gold-line)}
+  .pstepd summary{list-style:none;display:flex;align-items:center;gap:13px;padding:15px 16px;cursor:pointer}
+  .pstepd summary::-webkit-details-marker{display:none}
+  .pnum{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--gold);color:#1a1404;font-weight:700;font-size:14px;display:grid;place-items:center}
+  .ptit{flex:1;font-family:var(--serif);font-size:17px;line-height:1.25;color:var(--ink)}
+  .ptit small{display:block;font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:3px;line-height:1.45}
+  .chev{flex:0 0 auto;color:var(--ink-faint);transition:transform .2s;font-size:12px}
+  details.pstepd[open] .chev{transform:rotate(180deg)}
+  .pbody{padding:0 16px 16px 59px;color:var(--ink-dim);font-size:14px;line-height:1.65}
+  @media(max-width:480px){.pbody{padding-left:16px}}
+  .pbody b{color:var(--ink)}
+  body.sticky-on{padding-bottom:96px}
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:none;justify-content:center}
+  .sticky.show{display:flex}
+  .sticky .wa{margin:0;max-width:600px;padding:13px;font-size:15px;width:100%}
+  .calcsteps{margin-top:10px}
+  .cstep{display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid var(--line-soft);color:var(--ink-faint);font-size:15px;opacity:.4;transition:.35s}
+  .cstep i{width:21px;height:21px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;display:grid;place-items:center;transition:.35s}
+  .cstep.on{opacity:1;color:var(--ink-dim)}
+  .cstep.on i{border-color:var(--pos);background:var(--pos)}
+  .cstep.on i::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}
+  .plabel{display:inline-block;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--gold-deep);border:1px solid var(--gold-line);border-radius:99px;padding:6px 14px;margin-bottom:14px}
+
+  .press{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;align-items:baseline;margin-top:4px}
+  .press a{font-family:var(--serif);font-size:14.5px;color:var(--ink-faint);text-decoration:none;letter-spacing:.03em;border-bottom:1px solid transparent;transition:.18s}
+  .award{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:15px}
+  .award svg{flex:0 0 auto}
+  .award span{font-size:13px;color:var(--ink-dim);line-height:1.55;max-width:360px}
+  .award b{color:var(--gold-deep)}
+
+  details.panel{margin-top:24px;border:1px dashed var(--line);border-radius:12px;background:#FBF9F4}
+  details.panel summary{cursor:pointer;padding:13px 16px;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;list-style:none}
+  details.panel summary::-webkit-details-marker{display:none}
+  details.panel summary::before{content:"+ ";color:var(--gold-deep)}
+  details.panel[open] summary::before{content:"– "}
+  .panel-body{padding:4px 16px 16px}
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line-soft);gap:12px}
+  .kv .k{color:var(--ink-faint)} .kv .v2{font-weight:600;font-family:ui-monospace,Menlo,monospace;text-align:right;word-break:break-all}
+  .tier{display:inline-block;font-weight:700;font-size:12px;padding:3px 10px;border-radius:5px;margin-left:6px;letter-spacing:.08em}
+  .tier.alta{background:rgba(143,116,39,.14);color:var(--gold-deep)} .tier.media{background:rgba(92,85,70,.12);color:var(--ink-dim)} .tier.base{background:rgba(122,114,96,.12);color:var(--ink-faint)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tag{font-size:11px;font-family:ui-monospace,Menlo,monospace;background:#F2EEE4;border:1px solid var(--line);color:var(--ink-dim);padding:4px 8px;border-radius:5px}
+  pre.payload{font-size:11px;color:var(--ink-dim);background:#F2EEE4;border:1px solid var(--line-soft);border-radius:8px;padding:12px;overflow:auto;max-height:220px;margin:10px 0 0}
+  .premises label{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-dim);padding:6px 0;gap:10px}
+  .premises input{width:80px;font-size:13px;padding:7px 9px;font-weight:600;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:7px;color:var(--ink)}
+  .premises .btn{margin-top:12px}
+  .prem{font-size:11.5px;color:var(--ink-faint);line-height:1.6;margin-top:22px;text-align:center}
+  .restart{display:block;margin:16px auto 0;background:none;border:none;color:var(--ink-faint);font-size:12.5px;cursor:pointer;font-family:inherit;text-decoration:underline}
+
+  /* ===== TELA INICIAL — expectativa ===== */
+  .intro-meta{display:flex;justify-content:center;flex-wrap:wrap;gap:9px 22px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  .intro-meta span{font-size:12.5px;color:var(--ink-faint);letter-spacing:.02em;display:inline-flex;align-items:center;gap:7px}
+  .intro-meta span::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--gold-deep);flex:0 0 auto}
+  .intro-meta b{color:var(--ink-dim);font-weight:700}
+
+  /* ===== INSIGHT — valor percebido durante o funil ===== */
+  .insight{display:none;gap:11px;align-items:flex-start;margin:14px auto 0;padding:13px 15px;background:#FBF9F4;border:1px solid var(--line-soft);border-radius:12px;animation:fade .4s ease both}
+  .insight.show{display:flex}
+  .insight .ibulb{flex:0 0 auto;margin-top:1px}
+  .insight p{margin:0;font-size:13px;line-height:1.55;color:var(--ink-dim)}
+  .insight b{color:var(--ink);font-weight:700}
+  .insight .ik{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);font-weight:700;margin-bottom:3px}
+  body.result-mode .insight{display:none}
+
+  /* ===== MODO RESULTADO — quebra de layout p/ sensação de chegada ===== */
+  body.result-mode{--maxw:660px}
+  body.result-mode .progress{display:none}
+  body.result-mode .card{background:transparent;border:none;box-shadow:none;padding:0}
+  @media(max-width:480px){body.result-mode .card{padding:0}}
+
+  /* barra de progresso de leitura (fixa no topo) */
+  .readbar{position:fixed;left:0;right:0;top:0;height:3px;z-index:70;display:none;pointer-events:none}
+  body.result-mode .readbar{display:block}
+  .readbar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold));transition:width .12s linear}
+
+  /* cabeçalho de chegada */
+  .arrival{text-align:center;padding:6px 8px 2px;margin-bottom:8px;animation:arrive .65s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes arrive{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.arrival{animation:none}}
+  .arrival-badge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--pos);background:rgba(30,127,79,.10);border:1px solid rgba(30,127,79,.28);border-radius:99px;padding:7px 15px}
+  .arrival-badge svg{flex:0 0 auto}
+  .arrival-title{font-family:var(--serif);font-size:clamp(26px,7.5vw,34px);line-height:1.16;font-weight:600;letter-spacing:-.015em;color:var(--ink);margin:17px 0 11px}
+  .arrival-sub{max-width:31em;margin:0 auto;color:var(--ink-dim);font-size:14.5px;line-height:1.62}
+
+  /* passos do plano — abertos, sem sanfona */
+  .planstep{padding:21px 0;border-top:1px solid var(--line-soft)}
+  .planstep:first-child{border-top:none;padding-top:6px}
+  .planstep-h{display:flex;align-items:flex-start;gap:14px}
+  .planstep-h .pnum{margin-top:2px}
+  .planstep-ht{flex:1;min-width:0}
+  .planstep-ht .ptit{font-family:var(--serif);font-size:19px;line-height:1.25;color:var(--ink);display:block}
+  .planstep-ht small{display:block;font-size:13px;color:var(--ink-faint);margin-top:4px;line-height:1.5}
+  .planstep-body{margin-top:13px;padding-left:44px;color:var(--ink-dim);font-size:14.5px;line-height:1.7}
+  @media(max-width:480px){.planstep-body{padding-left:0}}
+  .planstep-body b{color:var(--ink);font-weight:700}
+  .pguar{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px;color:var(--gold-deep);font-weight:600}
+  .pguar svg{flex:0 0 auto}
+
+  /* leitura guiada — cada parte se revela ao chegar nela (e fica nítida) */
+  .focusable{transition:opacity .6s ease, filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1)}
+  /* resultado: blocos "bloqueados" ficam embaçados até o toque — gera curiosidade */
+  .lockwrap{position:relative}
+  .focusable{transition:filter .55s ease, opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1)}
+  .focusable.lockedblk{filter:blur(8px) saturate(.92);opacity:.62;pointer-events:none;user-select:none;transform:scale(.992)}
+  .focusable.revealed{filter:none;opacity:1;transform:none}
+  .unlock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;z-index:3;transition:opacity .4s ease}
+  .unlock.gone{opacity:0;pointer-events:none}
+  .unlock .upill{display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:#1a1404;font-weight:700;font-size:14px;padding:13px 20px;border-radius:99px;box-shadow:0 6px 22px rgba(27,22,16,.24);letter-spacing:.01em;max-width:90%;text-align:left;line-height:1.25}
+  .unlock .uic{width:22px;height:22px;border-radius:50%;background:rgba(26,20,4,.14);display:grid;place-items:center;flex:0 0 auto}
+  @media(hover:hover){.unlock:hover .upill{background:#f4cd6e}}
+  .unlock:focus-visible{outline:none}
+  .unlock:focus-visible .upill{outline:2px solid #1a1404;outline-offset:2px}
+  @keyframes upulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .unlock .upill{animation:upulse 2.4s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.focusable{transition:none}.unlock .upill{animation:none}}
+
+  /* linha de fechamento (custo de adiar) */
+  .closingloss{text-align:center;font-size:13.5px;line-height:1.55;color:var(--loss);margin:6px 6px 2px}
+  .closingloss b{font-weight:700}
+  .closingloss:empty{display:none}
+
+  /* aviso de saída (desktop) */
+  .exitov{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(16,12,8,.55);backdrop-filter:blur(3px);animation:fade .25s ease both}
+  .exitov.show{display:flex}
+  .exitcard{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:400px;width:100%;padding:26px 24px;text-align:center;box-shadow:0 24px 70px rgba(27,22,16,.3)}
+  .exitcard .exit-ic{width:46px;height:46px;border-radius:50%;background:var(--gold-glow);border:1px solid var(--gold-line);display:grid;place-items:center;margin:0 auto 14px}
+  .exitcard h3{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink);margin:0 0 9px;line-height:1.2}
+  .exitcard p{font-size:14.5px;line-height:1.6;color:var(--ink-dim);margin:0 0 18px}
+  .exitcard .wa{margin-top:0}
+  .exit-dismiss{display:block;margin:12px auto 0;background:none;border:none;color:var(--ink-faint);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline}
+
+  /* barra de encaminhamento automático (mobile) */
+  .rdbar{position:fixed;left:0;right:0;bottom:0;z-index:80;display:none;align-items:center;gap:11px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(168deg,#13190F,#0A0907);border-top:1px solid #2A261D;color:#F2EDE2}
+  body.rd-on .rdbar{display:flex}
+  body.rd-on .sticky{display:none!important}
+  .rdbar .rd-tx{flex:1;min-width:0;font-size:13px;line-height:1.4;color:#D8CCAE}
+  .rdbar .rd-tx b{color:#EFBF4F;font-weight:700;font-variant-numeric:tabular-nums}
+  .rdbar .rd-go{flex:0 0 auto;background:#22C35E;color:#fff;font-weight:700;font-size:14px;text-decoration:none;padding:11px 16px;border-radius:10px}
+  .rdbar .rd-x{flex:0 0 auto;background:none;border:none;color:#9A937F;font-size:18px;line-height:1;cursor:pointer;padding:4px 6px;font-family:inherit}
+</style>
+
+<div class="bar"><div class="bar-in">
+  <svg class="logo" viewBox="0 0 400 152" xmlns="http://www.w3.org/2000/svg" aria-label="AUVP">
+    <path d="m104.84,70.27c-21.73-28.04-56.95-28.04-78.68,0l-4.16,5.37,4.16,5.37c21.73,28.04,56.95,28.04,78.68,0l4.16-5.37-4.16-5.37Zm-22.96,4.92c.15,4.31-1.38,8.43-4.32,11.58-2.94,3.16-6.93,4.98-11.25,5.14-.2,0-.39.01-.59.01-4.09,0-7.99-1.54-11-4.33-2.4-2.23-4.04-5.09-4.75-8.27-.09-.39.16-.77.54-.86.19-.04.38,0,.54.09.16.1.28.26.32.45.65,2.9,2.15,5.5,4.33,7.53,2.88,2.68,6.63,4.08,10.56,3.94,3.93-.14,7.57-1.8,10.25-4.68,2.68-2.88,4.08-6.63,3.94-10.56-.14-3.93-1.8-7.57-4.68-10.25-2.88-2.68-6.61-4.08-10.56-3.94-3.93.14-7.57,1.8-10.25,4.68-.65.7-1.23,1.46-1.73,2.26-.21.34-.66.44-.99.23-.16-.1-.28-.26-.32-.45s-.01-.38.09-.54c.55-.88,1.19-1.71,1.9-2.48,2.94-3.16,6.94-4.98,11.25-5.14,4.33-.15,8.43,1.38,11.58,4.32,3.16,2.94,4.98,6.94,5.14,11.25Zm-12.31-.84c.87,0,1.63-.49,2.03-1.2.37.8.58,1.68.58,2.62,0,3.45-2.8,6.25-6.25,6.25s-6.25-2.8-6.25-6.25,2.8-6.25,6.25-6.25c.89,0,1.74.19,2.5.52-.69.4-1.16,1.15-1.16,2,0,1.27,1.03,2.31,2.31,2.31Zm.58-3.96c.14.03.26.07.36.11l.06.62c-.11-.05-.23-.09-.36-.12-.13-.03-.27-.05-.42-.05-.1,0-.17,0-.22.02-.05.01-.09.03-.11.06-.02.03-.03.06-.03.09h0s.01.08.04.11c.02.03.07.06.14.09.07.03.16.06.28.1.18.06.32.11.44.17.12.06.21.14.27.23.06.1.09.22.09.39v.03c0,.27-.09.47-.26.6-.11.08-.27.13-.45.16v.38h-.6v-.36s-.06,0-.08,0c-.1-.01-.2-.03-.29-.06-.09-.02-.17-.05-.23-.07l-.06-.66c.11.05.24.09.38.13.15.04.3.06.46.06.14,0,.25-.01.3-.04.06-.03.09-.08.09-.14h0c0-.05-.01-.09-.04-.12-.03-.03-.07-.06-.14-.08-.06-.03-.15-.06-.26-.09-.18-.06-.33-.12-.45-.19s-.21-.15-.28-.25c-.06-.1-.09-.23-.09-.39v-.03c0-.24.08-.43.25-.55.11-.08.26-.13.44-.16v-.37h.6v.37c.06,0,.13,0,.17.02Zm-2.71-4.53c-2.67-.31-5.28.43-7.37,2.08-2.1,1.66-3.43,4.03-3.74,6.68-.31,2.65.43,5.27,2.08,7.37,1.66,2.1,4.03,3.43,6.68,3.74,2.05.24,4.09-.14,5.91-1.12,1.77-.95,3.2-2.4,4.13-4.17.18-.35.61-.48.97-.3.17.09.3.24.35.42.06.18.04.38-.05.55-1.06,2.03-2.7,3.68-4.72,4.77-1.66.89-3.52,1.36-5.4,1.36-.45,0-.91-.03-1.36-.08-3.03-.36-5.74-1.88-7.64-4.28-1.9-2.4-2.74-5.39-2.38-8.42.36-3.03,1.88-5.75,4.28-7.64,2.4-1.89,5.39-2.74,8.43-2.38,4.26.51,7.85,3.32,9.37,7.34.07.18.06.37-.02.55-.08.17-.22.31-.4.37-.37.14-.79-.05-.92-.42-1.33-3.52-4.47-5.98-8.19-6.42Zm14.65,26.08c-4.32,4.32-10.06,6.7-16.17,6.7s-11.85-2.38-16.17-6.7c-4.32-4.32-6.7-10.06-6.7-16.17s2.38-11.85,6.7-16.17c4.32-4.32,10.06-6.7,16.17-6.7.87,0,1.75.05,2.6.15.19.02.36.12.48.27.12.15.17.34.15.53-.02.19-.11.36-.26.48-.15.12-.34.18-.53.15-.81-.09-1.63-.14-2.44-.14-5.72,0-11.1,2.23-15.15,6.28-4.05,4.05-6.28,9.43-6.28,15.16s2.23,11.11,6.28,15.15c4.05,4.05,9.43,6.28,15.15,6.28s11.11-2.23,15.16-6.28c4.05-4.05,6.28-9.43,6.28-15.15,0-4.66-1.47-9.09-4.24-12.81-.12-.15-.16-.34-.13-.53.03-.19.13-.36.28-.47.15-.11.34-.16.53-.13.19.03.36.13.47.28,2.96,3.97,4.53,8.7,4.53,13.67,0,6.11-2.38,11.85-6.7,16.17Z"/>
+    <path d="m174.97,101.17l-7.22-12.17h-.05l-5.05-8.56-9.42-15.86-21.58,36.6h-12.52l27.18-45.23c1.27-2.12,3.56-3.41,6.03-3.41h6.64l29.23,48.65h-13.23Z"/>
+    <path d="m233.49,49.69h10.76v28.75c0,15.93-8,23.44-28.24,23.44s-28.24-7.51-28.24-23.44v-28.75h11.4v28.75c0,9.14,3.96,12.61,17.2,12.61s17.13-3.47,17.13-12.61v-28.75Z"/>
+    <path d="m248.21,49.69h13.45l21.51,36.75,21.44-36.75h12.67l-29.23,48.65h-10.62l-29.23-48.65Z"/>
+    <path d="m331.91,87.29v-10.69h26.76c5.37,0,8.56-3.19,8.56-7.93s-3.18-7.93-8.56-7.93h-25.62v40.43h-10.96v-51.47h36.59c12.17,0,19.32,7.22,19.32,18.63s-7.15,18.97-19.32,18.97h-26.77Z"/>
+  </svg>
+  <span class="stepno" id="stepno"></span>
+</div></div>
+
+<div class="wrap">
+  <div class="progress"><i id="bar"></i></div>
+
+  <div class="card">
+
+    <!-- 1. OBJETIVO -->
+    <section class="step active" data-id="objetivo">
+      <div class="eyebrow">Diagnóstico patrimonial AUVP</div>
+      <h1>O que o seu dinheiro precisa fazer por você?</h1>
+      <!-- [A/B emoção] abertura: lidera pela vida (era: "Comece pelo destino — é assim que um consultor AUVP inicia qualquer plano. Em poucos minutos você recebe um retrato do seu patrimônio e os próximos passos, na ordem certa.") -->
+      <p class="sub">Toda boa decisão de dinheiro começa pela vida que você quer. Responda algumas perguntas e veja, em números, até onde o seu caminho leva hoje — e o que muda a rota.</p>
+      <div class="opts" data-radio="objetivo">
+        <button class="opt" data-val="crescer"><span class="txt">Construir um patrimônio sólido<small>Investir com inteligência para o futuro</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="renda"><span class="txt">Criar renda passiva<small>Novas fontes de renda caindo todo mês</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="ambos"><span class="txt">Os dois<small>Crescer agora, viver de renda depois</small></span><i class="chk"></i></button>
+      </div>
+      <div class="nav"><button class="btn btn-primary" data-next disabled>Começar meu diagnóstico</button></div>
+      <div class="intro-meta">
+        <span><b>9</b> etapas rápidas</span>
+        <span><b>~2 min</b> para concluir</span>
+        <span><b>Seu plano</b> ao final</span>
+      </div>
+    </section>
+
+    <!-- 2. IDADE -->
+    <section class="step" data-id="idade">
+      <div class="eyebrow">Sobre você</div>
+      <h1>Quantos anos você tem?</h1>
+      <p class="sub">É a variável que mais pesa no seu plano: define quanto tempo os juros compostos têm para trabalhar a seu favor.</p>
+      <div class="slider">
+        <div class="readout"><span class="num" id="idadeVal">35</span><span class="unit">anos</span></div>
+        <div class="srow"><button type="button" class="stepbtn" data-step="idade" data-dir="-1" aria-label="Diminuir idade">−</button><input type="range" id="idadeRange" min="16" max="85" value="35"><button type="button" class="stepbtn" data-step="idade" data-dir="1" aria-label="Aumentar idade">+</button></div>
+        <div class="ends"><span>16</span><span>85</span></div>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 3. APORTE -->
+    <section class="step" data-id="aporte">
+      <div class="eyebrow">Capacidade</div>
+      <h1>Quanto você consegue investir por mês?</h1>
+      <p class="sub">Use o número real. Nossos consultores planejam com fatos — um plano honesto vale mais que uma meta inflada.</p>
+      <div class="slider">
+        <div class="readout"><span class="cur">R$</span><input class="num" id="aporteVal" inputmode="numeric" value="0"><span class="plus" id="aportePlus" style="display:none">+</span></div>
+        <div class="srow"><button type="button" class="stepbtn" data-step="aporte" data-dir="-1" aria-label="Diminuir valor">−</button><input type="range" id="aporteRange" min="0" max="1000" value="0"><button type="button" class="stepbtn" data-step="aporte" data-dir="1" aria-label="Aumentar valor">+</button></div>
+        <div class="ends"><span>R$ 0</span><span>sem teto</span></div>
+        <div class="hint">Arraste, use − e +, ou toque no valor acima para digitar</div>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 4. PATRIMÔNIO -->
+    <section class="step" data-id="patrimonio">
+      <div class="eyebrow">Ponto de partida</div>
+      <h1>Quanto você já tem investido hoje?</h1>
+      <!-- [A/B fricção] tira a pressão de exatidão (era: "Some renda fixa, fundos, ações, previdência e cripto. Esse dado é tratado sob sigilo e usado apenas para calcular o seu plano.") -->
+      <p class="sub">Some renda fixa, fundos, ações, previdência e cripto — um valor aproximado já basta. Esse dado fica sob sigilo e serve só para calcular o seu plano.</p>
+      <div class="slider">
+        <div class="readout"><span class="cur">R$</span><input class="num" id="patrimonioVal" inputmode="numeric" value="0"><span class="plus" id="patrimonioPlus" style="display:none">+</span></div>
+        <div class="srow"><button type="button" class="stepbtn" data-step="patrimonio" data-dir="-1" aria-label="Diminuir valor">−</button><input type="range" id="patrimonioRange" min="0" max="1000" value="0"><button type="button" class="stepbtn" data-step="patrimonio" data-dir="1" aria-label="Aumentar valor">+</button></div>
+        <div class="ends"><span>R$ 0</span><span>sem teto</span></div>
+        <div class="hint">Arraste, use − e +, ou toque no valor acima para digitar</div>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 5. IMÓVEIS -->
+    <section class="step" data-id="imoveis">
+      <div class="eyebrow">Imóveis</div>
+      <h1>E em imóveis, quanto você tem?</h1>
+      <p class="sub">Casa própria conta. No seu resultado, vou mostrar uma comparação que nossos consultores fazem em toda análise patrimonial.</p>
+      <div class="slider">
+        <div class="readout"><span class="cur">R$</span><input class="num" id="imoveisVal" inputmode="numeric" value="0"><span class="plus" id="imoveisPlus" style="display:none">+</span></div>
+        <div class="srow"><button type="button" class="stepbtn" data-step="imoveis" data-dir="-1" aria-label="Diminuir valor">−</button><input type="range" id="imoveisRange" min="0" max="1000" value="0"><button type="button" class="stepbtn" data-step="imoveis" data-dir="1" aria-label="Aumentar valor">+</button></div>
+        <div class="ends"><span>Não tenho</span><span>sem teto</span></div>
+        <div class="hint">Arraste, use − e +, ou toque no valor acima para digitar</div>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 6a. DORES — PADRÃO -->
+    <section class="step" data-id="concerns_padrao">
+      <div class="eyebrow">Seu momento</div>
+      <h1>O que tira o seu sono hoje?</h1>
+      <p class="sub">Marque com sinceridade — cada resposta muda a recomendação que você recebe no final.</p>
+      <div class="opts" data-multi="concerns">
+        <button class="opt sq" data-val="dividas"><span class="txt">Dívidas que não me deixam avançar<small>Cartão, empréstimo, financiamento caro</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="comprar_imovel"><span class="txt">Quero conquistar um imóvel<small>Comprar ou financiar</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="proteger_familia"><span class="txt">Medo de faltar para a minha família<small>Quero segurança diante de um imprevisto</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="nenhum"><span class="txt">Nada disso por enquanto<small></small></span><i class="chk"></i></button>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 6b. DORES — PATRIMONIAL -->
+    <section class="step" data-id="concerns_pat">
+      <div class="eyebrow">Seu momento</div>
+      <h1>O que o seu patrimônio ainda não resolveu?</h1>
+      <p class="sub">Marque o que fizer sentido. É exatamente isso que o seu especialista vai endereçar primeiro.</p>
+      <div class="opts" data-multi="concerns">
+        <button class="opt sq" data-val="rentabilidade"><span class="txt">Render mais do que rende hoje<small>Sinto que meu dinheiro trabalha abaixo do potencial</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="diversificar"><span class="txt">Sair da concentração<small>Poucos ativos, um banco só, ou tudo em imóveis</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="renda_ativos"><span class="txt">Virar renda de verdade<small>Fazer o que construí pagar a minha vida</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="exterior"><span class="txt">Proteger fora do Brasil<small>Dolarizar, conta internacional, offshore</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="sucessao"><span class="txt">Impostos e herança<small>Holding, sucessão organizada, pagar menos imposto</small></span><i class="chk"></i></button>
+        <button class="opt sq" data-val="nenhum"><span class="txt">Nada disso por enquanto<small></small></span><i class="chk"></i></button>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next>Continuar</button></div>
+    </section>
+
+    <!-- 7. MOMENTO -->
+    <section class="step" data-id="momento">
+      <div class="eyebrow">Última pergunta</div>
+      <h1>Quem cuida do seu dinheiro hoje?</h1>
+      <p class="sub">Uma das respostas mais reveladoras para o seu consultor. Depois dessa, o seu número.</p>
+      <div class="opts" data-radio="momento">
+        <button class="opt" data-val="sozinho"><span class="txt">Eu mesmo<small>Invisto por conta própria</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="consultoria"><span class="txt">Banco ou consultoria<small>Alguém investe por mim</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="comecando"><span class="txt">Ninguém ainda<small>Está parado ou estou começando agora</small></span><i class="chk"></i></button>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next disabled>Continuar</button></div>
+    </section>
+
+    <!-- 7b. CONHECIMENTO (pulada para quem está começando) -->
+    <section class="step" data-id="conhecimento">
+      <div class="eyebrow">Seu nível</div>
+      <h1>Quanto você entende de investimentos hoje?</h1>
+      <p class="sub">Sem modéstia e sem vergonha — isso muda completamente o que vamos recomendar.</p>
+      <div class="opts" data-radio="conhecimento">
+        <button class="opt" data-val="iniciante"><span class="txt">Sou iniciante e quero aprender<small>Sei pouco ou estou começando agora</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="perdido"><span class="txt">Já tentei, mas me perdi no caminho<small>Comecei e travei em algum ponto</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="intermediario"><span class="txt">Já invisto, mas sem consistência ou clareza<small>Faço, mas sinto que poderia ser muito melhor</small></span><i class="chk"></i></button>
+        <button class="opt" data-val="avancado"><span class="txt">Quero profissionalizar como invisto<small>Domino o básico, busco o próximo nível</small></span><i class="chk"></i></button>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next disabled>Continuar</button></div>
+    </section>
+
+    <!-- 8. CONTATO -->
+    <section class="step" data-id="contato">
+      <div class="eyebrow">Diagnóstico concluído</div>
+      <h1>Seu plano está calculado e protegido.</h1>
+      <!-- [A/B emoção] dotação: "ele já é seu" (era: "Identifique-se para recebê-lo. Um especialista AUVP revisa o seu caso e orienta os próximos passos — sem custo e sem compromisso.") -->
+      <p class="sub">Ele já é seu — falta só dizer para quem enviar. Um especialista AUVP revisa o seu caso e orienta os próximos passos, sem custo e sem compromisso.</p>
+      <div class="field"><input type="text" class="text" id="nome" placeholder="Seu nome" autocomplete="name" maxlength="120"></div>
+      <div class="field">
+        <div class="telrow">
+          <span class="telcc"><select id="ddi" aria-label="País"></select></span>
+          <input type="tel" class="text" id="whats" placeholder="WhatsApp com DDD" inputmode="tel" autocomplete="tel-national">
+        </div>
+        <div class="fieldnote" id="whatsNote">Confira o número — parece incompleto.</div>
+      </div>
+      <div class="field"><input type="email" class="text" id="email" placeholder="E-mail" autocomplete="email" maxlength="254"></div>
+      <div class="guar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" stroke="#8F7427" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#8F7427" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Dados criptografados, tratados conforme a <b>LGPD</b> e nunca vendidos. E tudo que oferecemos tem <b>garantia incondicional: 100% do dinheiro de volta</b> em caso de insatisfação.</span>
+      </div>
+      <div class="nav"><button class="btn btn-ghost" data-back>Voltar</button><button class="btn btn-primary" data-next disabled>Revelar meu plano</button></div>
+    </section>
+
+    <!-- CALC: transparência operacional (ilusão de trabalho) -->
+    <section class="step" data-id="calc">
+      <div class="eyebrow">Um instante</div>
+      <h1>Montando o seu plano…</h1>
+      <p class="sub">Estamos cruzando as suas respostas com o cenário atual.</p>
+      <div class="calcsteps">
+        <div class="cstep"><i></i><span>Calculando com a Selic vigente (14,25% a.a.)</span></div>
+        <div class="cstep"><i></i><span>Cruzando com o seu objetivo e horizonte</span></div>
+        <div class="cstep"><i></i><span>Selecionando os passos para o seu perfil</span></div>
+      </div>
+    </section>
+
+    <!-- RESULT (tela única, rolagem) -->
+    <section class="step" data-id="result">
+      <div class="arrival">
+        <span class="arrival-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#1E7F4F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Diagnóstico concluído</span>
+        <h1 class="arrival-title" id="rTitle">Seu diagnóstico</h1>
+        <p class="arrival-sub">Está tudo aqui, em uma página só. Desça no seu ritmo — cada parte do seu plano aparece quando você chega nela.</p>
+      </div>
+      <div class="hero focusable" data-lock="Toque para revelar o seu número">
+        <div class="plabel" id="plabel"></div>
+        <div class="label" id="heroLabel">—</div>
+        <div class="big" id="heroBig">R$ 0</div>
+        <div class="second" id="heroSecondWrap" style="display:none">
+          <div class="label" id="heroLabel2">—</div>
+          <div class="big" id="heroBig2">R$ 0</div>
+        </div>
+        <div class="note" id="heroNote"></div>
+        <p class="wait" id="waitLine"></p>
+      </div>
+
+      <div class="rule"></div>
+      <div class="rblock rb-prova focusable" id="cmpBlock" data-lock="Toque para comparar os seus dois futuros" style="display:none">
+        <div class="rblock-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19V5M4 19h16M8 16l3-4 3 2 4-6" stroke="#1E7F4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tt" id="cmpTitle">Os seus dois futuros</span></div>
+        <div class="cmp">
+          <div class="cmp-col com"><div class="cmp-head">Com um plano</div><div id="cmpCom"></div></div>
+          <div class="cmp-col sem"><div class="cmp-head">Sem um plano</div><div id="cmpSem"></div></div>
+        </div>
+        <p class="cmp-diff" id="cmpDiff"></p>
+        <div class="chart" id="chartWrap" style="display:none">
+          <div id="chart"></div>
+          <div class="legend">
+            <span><i style="background:#1E7F4F"></i>Seguindo o plano</span>
+            <span><i class="dash"></i>Guardando sem investir</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rblock rb-plano focusable" data-lock="Toque para ver o seu plano, passo a passo">
+        <div class="rblock-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3 8-8M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" stroke="#8F7427" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="tt">O plano que recomendamos</span></div>
+        <p class="leadin" id="leadin"></p>
+        <div id="callout" style="margin-top:14px"></div>
+        <div id="paths"></div>
+      </div>
+
+      <div class="rblock rb-num focusable" data-lock="Toque para ver os números por trás">
+        <div class="rblock-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 7h10M7 12h10M7 17h6" stroke="#8F7427" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="tt">Os números por trás do plano</span></div>
+        <div id="splitWrap" style="display:none">
+          <div class="split" id="splitBar"></div>
+          <div class="splitlbl" id="splitLbl"></div>
+        </div>
+        <div id="stats"></div>
+        <div id="imovelBlock" style="display:none">
+          <p class="secttl" style="margin-top:22px">A comparação que prometi: seu imóvel vs. investido</p>
+          <div id="imovelStats"></div>
+          <p class="note" style="color:var(--ink-faint);font-size:13px;line-height:1.6;margin-top:12px" id="imovelNote"></p>
+        </div>
+      </div>
+
+      <!-- [combinado] custo de adiar repetido como última linha antes do CTA (frame de perda no fechamento) -->
+      <p class="closingloss" id="closingLoss"></p>
+
+      <div class="rblock rb-cta focusable">
+        <div class="rblock-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z" stroke="#EFBF4F" stroke-width="1.6" stroke-linejoin="round"/></svg></span><span class="tt">O passo de hoje</span></div>
+        <!-- [A/B emoção] ponte de fechamento: liga o esforço investido à ação -->
+        <p style="color:#D8CCAE;font-size:14.5px;line-height:1.6;margin:0 0 16px">O plano está pronto. O único passo que ele não dá sozinho é o primeiro — e esse é seu.</p>
+        <div class="spec" id="specCard" style="display:none;margin-top:0">
+          <img id="specFoto" src="" alt="">
+          <div><div class="sname" id="specNome"></div><div class="srole" id="specCargo"></div></div>
+        </div>
+        <a class="wa wa-link" id="waBtn" href="#" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z" stroke="#1a1404" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.2 8.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4.2.4.6 1.4.6 1.5.1.1.1.3 0 .4l-.3.5c-.1.2-.2.3-.1.5.2.3.7 1 1.4 1.6.9.7 1.6 1 1.9 1.1.2.1.4 0 .5-.1l.6-.7c.1-.2.3-.2.5-.1l1.4.7c.2.1.4.2.4.3 0 .2 0 .9-.4 1.5-.4.6-1.5 1.2-2.1 1.2-.5 0-2.4-.2-4.4-2-2-1.8-3.1-3.9-3.2-4.4-.1-.5-.1-1.5.6-2.4z" fill="#1a1404"/></svg>
+          <span id="waLabel">Seguir o plano com um especialista</span>
+        </a>
+        <p class="wanote">Seu especialista já recebe este diagnóstico completo — você não repete nada. Conversa sem compromisso, com <b>garantia de 100% do dinheiro de volta</b> no que decidir contratar.</p>
+      </div>
+
+      <div class="rule"></div>
+      <div class="focusable">
+      <p class="secttl" style="text-align:center">AUVP na imprensa</p>
+      <div class="press" id="press"></div>
+      <div class="award">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.7l5.4-.8L12 2z" stroke="#8F7427" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span>Eleita <b>2 vezes a melhor consultoria de investimentos do Brasil</b> pelo BTG Pactual.</span>
+      </div>
+      </div>
+
+      <div id="internalPanels" style="display:none">
+        <details class="panel">
+          <summary>Painel comercial — interno (Salesforce)</summary>
+          <div class="panel-body">
+            <div style="font-size:13px;margin-bottom:10px">Prioridade do lead <span id="tierBadge" class="tier base">—</span> <span id="scoreNum" style="float:right;color:var(--ink-faint);font-family:ui-monospace">score —</span></div>
+            <div id="kvs"></div>
+            <div class="tags" id="tags"></div>
+            <pre class="payload" id="payload"></pre>
+          </div>
+        </details>
+        <details class="panel">
+          <summary>Premissas da simulação</summary>
+          <div class="panel-body premises">
+            <label>Rentabilidade da carteira ao ano (Selic) <input type="number" id="pxReturn" value="14.25" step="0.25"></label>
+            <label>Inflação estimada ao ano (%) <input type="number" id="pxInfl" value="4.5" step="0.25"></label>
+            <label>Aluguel bruto do imóvel ao mês (%) <input type="number" id="pxAluguel" value="0.4" step="0.05"></label>
+            <button class="btn btn-primary" id="recalc">Recalcular</button>
+          </div>
+        </details>
+      </div>
+
+      <p class="prem">Simulação ilustrativa com base na Selic vigente (14,25% a.a.). Não constitui promessa de rentabilidade, recomendação de investimento ou aconselhamento jurídico ou tributário. A renda passiva é estimada de modo a preservar o patrimônio da inflação.</p>
+      <button class="restart" id="restart">Refazer diagnóstico</button>
+    </section>
+
+  </div>
+
+  <div class="insight" id="insight"></div>
+  <div class="trust" id="trust"></div>
+</div>
+
+<div class="readbar" id="readProgress"><i></i></div>
+
+<div class="sticky" id="sticky">
+  <a class="wa wa-link" href="#" target="_blank" rel="noopener">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z" stroke="#1a1404" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.2 8.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4.2.4.6 1.4.6 1.5.1.1.1.3 0 .4l-.3.5c-.1.2-.2.3-.1.5.2.3.7 1 1.4 1.6.9.7 1.6 1 1.9 1.1.2.1.4 0 .5-.1l.6-.7c.1-.2.3-.2.5-.1l1.4.7c.2.1.4.2.4.3 0 .2 0 .9-.4 1.5-.4.6-1.5 1.2-2.1 1.2-.5 0-2.4-.2-4.4-2-2-1.8-3.1-3.9-3.2-4.4-.1-.5-.1-1.5.6-2.4z" fill="#1a1404"/></svg>
+    <span>Falar com um especialista</span>
+  </a>
+</div>
+
+<!-- aviso de saída (desktop, exit-intent) -->
+<div class="exitov" id="exitModal" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+  <div class="exitcard">
+    <span class="exit-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z" stroke="#8F7427" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+    <h3 id="exitTitle">Antes de você sair…</h3>
+    <p>Que tal pegar a opinião de um especialista em investimentos sobre o seu resultado? Leva poucos minutos, é sem custo e sem compromisso.</p>
+    <a class="wa wa-link" id="exitGo" href="#" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z" stroke="#1a1404" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.2 8.4c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4.2.4.6 1.4.6 1.5.1.1.1.3 0 .4l-.3.5c-.1.2-.2.3-.1.5.2.3.7 1 1.4 1.6.9.7 1.6 1 1.9 1.1.2.1.4 0 .5-.1l.6-.7c.1-.2.3-.2.5-.1l1.4.7c.2.1.4.2.4.3 0 .2 0 .9-.4 1.5-.4.6-1.5 1.2-2.1 1.2-.5 0-2.4-.2-4.4-2-2-1.8-3.1-3.9-3.2-4.4-.1-.5-.1-1.5.6-2.4z" fill="#1a1404"/></svg>
+      <span>Pegar a opinião de um especialista</span>
+    </a>
+    <button class="exit-dismiss" id="exitClose">Quero continuar lendo</button>
+  </div>
+</div>
+
+<!-- encaminhamento automático (mobile) -->
+<div class="rdbar" id="redirectBar">
+  <button class="rd-x" id="rdCancel" aria-label="Continuar lendo">✕</button>
+  <div class="rd-tx">Sem resposta, levamos você a um especialista em <b><span id="rdNum">30</span>s</b></div>
+  <a class="rd-go wa-link" id="rdGo" href="#" target="_blank" rel="noopener">Falar agora</a>
+</div>
+
+<script type="b5e5da3627c90911240c9fe4-text/javascript">
+(function(){
+  /* ===== CONFIG — preencher antes de publicar ===== */
+  var WHATSAPP_NUMBER='556234139882';
+  var WA_MSG='Terminei de preencher o meu questionário da AUVP. Quero receber o meu resultado.';
+  var WA_URL='https://api.whatsapp.com/send?phone='+WHATSAPP_NUMBER+'&text='+encodeURIComponent(WA_MSG);
+  var SALESFORCE_WEBHOOK='https://n8n.prod.asupernova.com.br/webhook/77b4412f-7f2a-4eb0-8393-d0f352b87a30';
+  var ENVIRONMENT='prod';
+  var ANALYTICS_WEBHOOK='';
+  var UTM_KEYS=['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
+  var utms=(function(){var p=new URLSearchParams(window.location.search),o={};UTM_KEYS.forEach(function(k){var v=p.get(k);if(v)o[k]=v;});return o;})();            // opcional: URL (Make / Apps Script / planilha) que recebe os eventos de funil para o painel de drop-off
+  var PRESS=[
+    {name:'Correio Braziliense', url:'https://www.correiobraziliense.com.br/colunistas/fabiano-moraes/2024/10/6967228-auvp-capital-proxima-da-lideranca-nacional-no-segmento-de-consultorias-financeiras-no-ranking-do-btg-pactual-auvp-capital-comemora.html'},
+    {name:'Estado de Minas', url:'https://www.em.com.br/colunistas/fabiano-moraes/2024/10/6967224-auvp-capital-se-aproxima-da-lideranca-nacional-no-segmento-de-consultorias.html'},
+    {name:'Jornal de Brasília', url:'https://jornaldebrasilia.com.br/entretenimento/katia-flavia/pelo-segundo-ano-seguido-auvp-conquista-premio-de-consultoria-no-1-do-ranking-btg-pactual/'},
+    {name:'Economia S/A', url:'https://economiasa.com.br/blog/auvp-capital-e-eleita-a-melhor-consultoria-de-investimentos-do-brasil-pelo-btg-pactual/'}
+  ];
+  var SPECIALIST={nome:'', cargo:'Especialista patrimonial AUVP', foto:''};
+  /* ================================================ */
+
+  // eventos de funil: vão para window.dataLayer (GA4/GTM) e, se configurado, para ANALYTICS_WEBHOOK
+  var SID=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  function track(ev,extra){
+    var e={event:'funil_'+ev,sid:SID,ts:new Date().toISOString(),versao:'v6'};
+    if(extra)for(var k in extra)e[k]=extra[k];
+    try{window.dataLayer=window.dataLayer||[];window.dataLayer.push(e);}catch(_){}
+    if(ANALYTICS_WEBHOOK){try{(navigator.sendBeacon&&navigator.sendBeacon(ANALYTICS_WEBHOOK,JSON.stringify(e)))||fetch(ANALYTICS_WEBHOOK,{method:'POST',body:JSON.stringify(e),keepalive:true});}catch(_){}}
+  }
+
+  var FLOW=['objetivo','idade','aporte','patrimonio','imoveis','concerns','momento','conhecimento','contato','result'];
+  var TRUST={
+    objetivo:'AUVP é avaliada a <b>melhor escola de investimentos do Brasil</b>.',
+    idade:'Cada resposta afina o <b>seu número</b>.',
+    aporte:'Eleita <b>2x a melhor consultoria do Brasil</b> pelo BTG Pactual.',
+    patrimonio:'Dados criptografados, tratados conforme a <b>LGPD</b>.',
+    imoveis:'Analisamos o <b>patrimônio completo</b> — não só o que está na bolsa.',
+    concerns_padrao:'Quanto mais específico você for, <b>mais precisa a recomendação</b>.',
+    concerns_pat:'Patrimônios de todos os portes — <b>com a mesma garantia</b>.',
+    momento:'<b>Garantia incondicional</b>: 100% do dinheiro de volta.',
+    conhecimento:'Cada nível recebe um plano diferente — <b>o seu</b>.',
+    contato:'Eleita <b>2x a melhor consultoria do Brasil</b> pelo BTG Pactual.'
+  };
+
+  // valor percebido durante o funil — nuggets úteis ligados a cada pergunta
+  var INSIGHT={
+    idade:'Pelos juros compostos, cada década de antecedência pode mais que dobrar o resultado final. <b>Tempo costuma pesar mais do que o tamanho do aporte.</b>',
+    aporte:'Constância vence intensidade: aportes menores e <b>regulares</b>, reinvestidos, tendem a superar aportes grandes e esporádicos.',
+    patrimonio:'Uma taxa de 2% ao ano parece inofensiva, mas em algumas décadas pode consumir uma fatia enorme do patrimônio. <b>No longo prazo, custo corrói mais que volatilidade.</b>',
+    imoveis:'Imóvel é patrimônio, mas é pouco líquido — contar com ele para imprevistos costuma sair caro. Por isso olhamos o <b>conjunto</b>, não só a bolsa.',
+    concerns_padrao:'Quem acha que "não consegue investir" quase nunca tem um problema de renda: tem um problema de <b>método e de prioridades</b>. Isso dá para resolver.',
+    concerns_pat:'Patrimônio grande traz problemas diferentes: imposto, sucessão e concentração. A maior perda costuma ser <b>o que não foi estruturado a tempo</b>.',
+    momento:'Quem investe sozinho costuma pagar taxas invisíveis no banco. Muitas vezes o primeiro ganho não é render mais — é <b>parar de perder</b>.',
+    conhecimento:'Você não precisa virar especialista. Precisa de um <b>método replicável</b> e de alguém para revisar as decisões que pesam.'
+  };
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  var idx=0;
+  var data={idade:35,aporte:0,patrimonio:0,imoveis:0,objetivo:null,concerns:[],momento:null,conhecimento:null,nome:'',whats:'',email:''};
+
+  var bar=document.getElementById('bar'), stepno=document.getElementById('stepno'), trust=document.getElementById('trust'), insight=document.getElementById('insight');
+  function sec(id){return document.querySelector('.step[data-id="'+id+'"]');}
+  function pad(n){return (n<10?'0':'')+n;}
+  function isPatrimonial(){return (data.patrimonio+data.imoveis)>=5000000 || data.patrimonio>=1000000;}
+  function realId(id){return id==='concerns' ? (isPatrimonial()?'concerns_pat':'concerns_padrao') : id;}
+
+  function showId(vid){
+    var id=realId(vid);
+    document.querySelectorAll('.step').forEach(function(s){s.classList.toggle('active', s.dataset.id===id);});
+    var pos=FLOW.indexOf(vid), last=FLOW.length-1;
+    bar.style.width=(pos<0?0:(pos/last)*100)+'%';
+    stepno.textContent=(vid==='result'||pos<0)?'':pad(pos+1)+' / '+pad(last);
+    trust.innerHTML = TRUST[id] ? '<i class="tdot"></i><span>'+TRUST[id]+'</span>' : '';
+    if(INSIGHT[id] && vid!=='result'){
+      insight.innerHTML='<svg class="ibulb" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2v.3h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z" stroke="#8F7427" stroke-width="1.5" stroke-linejoin="round"/></svg><p><span class="ik">Você sabia?</span>'+INSIGHT[id]+'</p>';
+      insight.classList.add('show');
+    } else { insight.innerHTML=''; insight.classList.remove('show'); }
+    document.body.classList.toggle('result-mode', vid==='result');
+    if(vid==='result'){ setupResultFx(); armExit(); startRedirect(); } else { clearResultFx(); disarmExit(); stopRedirect(); hideExit(); exitShown=false; }
+    track('step_view',{step:vid});
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(vid==='result') requestAnimationFrame(function(){ resultFx(); setTimeout(resultFx,90); });
+    var inp=sec(id)&&sec(id).querySelector('input.text');
+    if(inp&&vid!=='result') setTimeout(function(){inp.focus();},160);
+    validate();
+    if(typeof stickyTick==='function')stickyTick();
+  }
+  function go(d){
+    if(d>0)track('step_complete',{step:FLOW[idx]});
+    var fromContato = d>0 && FLOW[idx]==='contato';
+    idx=Math.max(0,Math.min(FLOW.length-1,idx+d));
+    while(FLOW[idx]==='conhecimento' && data.momento==='comecando'){
+      data.conhecimento='iniciante';
+      idx=Math.max(0,Math.min(FLOW.length-1,idx+d));
+    }
+    var vid=FLOW[idx];
+    if(vid==='result'){read();compute();}
+    if(fromContato){runCalc(function(){showId(vid);});return;}
+    showId(vid);
+  }
+  function runCalc(done){
+    document.querySelectorAll('.step').forEach(function(s){s.classList.toggle('active', s.dataset.id==='calc');});
+    stepno.textContent=''; bar.style.width='100%';
+    trust.innerHTML='<i class="tdot"></i><span>Simulação com premissas <b>abertas e auditáveis</b>.</span>';
+    track('step_view',{step:'calc'});
+    window.scrollTo({top:0,behavior:'smooth'});
+    var cs=document.querySelectorAll('.cstep');
+    cs.forEach(function(c){c.classList.remove('on');});
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){cs.forEach(function(c){c.classList.add('on');});setTimeout(done,400);return;}
+    setTimeout(function(){cs[0].classList.add('on');},250);
+    setTimeout(function(){cs[1].classList.add('on');},1050);
+    setTimeout(function(){cs[2].classList.add('on');},1850);
+    setTimeout(done,2600);
+  }
+
+  function fmt(n){return 'R$ '+Math.round(n).toLocaleString('pt-BR');}
+  function fmtNum(n){return Math.round(n).toLocaleString('pt-BR');}
+  function digits(s){return (s+'').replace(/\D/g,'');}
+
+  var AGE, SLIDERS={};
+  (function(){
+    var r=document.getElementById('idadeRange'), v=document.getElementById('idadeVal');
+    function paint(){var t=(r.value-r.min)/(r.max-r.min);r.style.setProperty('--fill',(t*100).toFixed(1)+'%');}
+    function setVal(n){n=Math.max(16,Math.min(85,n));data.idade=n;r.value=n;v.textContent=n;paint();}
+    r.addEventListener('input',function(){data.idade=+r.value;v.textContent=r.value;paint();});
+    AGE={set:setVal};
+    paint();
+  })();
+
+  function nice(v){ if(v<10000)return Math.round(v/100)*100; if(v<100000)return Math.round(v/1000)*1000; if(v<1000000)return Math.round(v/5000)*5000; if(v<10000000)return Math.round(v/50000)*50000; return Math.round(v/250000)*250000; }
+  function makeSlider(key,MAX,B){
+    var range=document.getElementById(key+'Range'), inp=document.getElementById(key+'Val'), plus=document.getElementById(key+'Plus');
+    var A=MAX/(B-1);
+    function toVal(t){return A*(Math.pow(B,t)-1);}
+    function toPos(v){return Math.log(v/A+1)/Math.log(B);}
+    function paint(t){range.style.setProperty('--fill',(t*100).toFixed(1)+'%'); if(plus)plus.style.display=(data[key]>=MAX*0.985)?'inline':'none';}
+    range.addEventListener('input',function(){var t=range.value/1000;var v=nice(toVal(t));data[key]=v;inp.value=fmtNum(v);paint(t);});
+    inp.addEventListener('input',function(){var v=Math.min(MAX,+digits(inp.value)||0);data[key]=v;inp.value=v?fmtNum(v):'';var t=v<=0?0:Math.min(1,Math.max(0,toPos(v)));range.value=Math.round(t*1000);paint(t);});
+    inp.addEventListener('blur',function(){inp.value=fmtNum(data[key]);});
+    SLIDERS[key]={set:function(v){
+      v=Math.max(0,Math.min(MAX,v));
+      data[key]=v; inp.value=fmtNum(v);
+      var t=v<=0?0:Math.min(1,Math.max(0,toPos(v)));
+      range.value=Math.round(t*1000); paint(t);
+    }};
+    paint(0);
+  }
+  makeSlider('aporte',500000,3500);
+  makeSlider('patrimonio',100000000,4500);
+  makeSlider('imoveis',100000000,4500);
+
+  // steppers: incremento proporcional ao valor — ninguém precisa arrastar nada
+  function moneyStep(v){return v<10000?500:v<100000?5000:v<1000000?25000:v<10000000?250000:1000000;}
+  document.querySelectorAll('.stepbtn').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.dataset.step, d=+b.dataset.dir;
+      if(k==='idade'){AGE.set(data.idade+d);}
+      else{var s=moneyStep(d<0?Math.max(0,data[k]-1):data[k]);SLIDERS[k].set(data[k]+d*s);}
+    });
+  });
+
+  document.querySelectorAll('[data-radio]').forEach(function(g){
+    g.querySelectorAll('.opt').forEach(function(o){
+      o.addEventListener('click',function(){ g.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');}); o.classList.add('sel'); data[g.dataset.radio]=o.dataset.val; validate(); });
+    });
+  });
+  document.querySelectorAll('[data-multi="concerns"]').forEach(function(mg){
+    mg.querySelectorAll('.opt').forEach(function(o){
+      o.addEventListener('click',function(){
+        var v=o.dataset.val;
+        if(v==='nenhum'){ mg.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');}); o.classList.add('sel'); data.concerns=['nenhum']; }
+        else{ mg.querySelector('[data-val="nenhum"]').classList.remove('sel'); o.classList.toggle('sel');
+          data.concerns=Array.prototype.map.call(mg.querySelectorAll('.opt.sel'),function(x){return x.dataset.val;}).filter(function(x){return x!=='nenhum';}); }
+        validate();
+      });
+    });
+  });
+
+  ['nome','email'].forEach(function(id){
+    var el=document.getElementById(id);
+    el.addEventListener('input',function(){
+      validate();
+      var ok=false;
+      if(id==='nome') ok=el.value.trim().length>=2;
+      if(id==='email') ok=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value);
+      el.classList.toggle('ok',ok);
+    });
+  });
+
+  function read(){
+    data.nome=document.getElementById('nome').value.trim();
+    data.whats=document.getElementById('whats').value.trim();
+    data.email=document.getElementById('email').value.trim();
+  }
+  function valid(vid){
+    read(); var id=realId(vid);
+    if(id==='objetivo') return !!data.objetivo;
+    if(id==='momento') return !!data.momento;
+    if(id==='conhecimento') return !!data.conhecimento;
+    if(id==='contato') return data.nome.length>=2 && phoneOk() && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email);
+    return true;
+  }
+  function validate(){ var vid=FLOW[idx]; var s=sec(realId(vid)); var btn=s&&s.querySelector('[data-next]'); if(btn)btn.disabled=!valid(vid); }
+  document.querySelectorAll('[data-next]').forEach(function(b){b.addEventListener('click',function(){if(valid(FLOW[idx]))go(1);});});
+  document.querySelectorAll('[data-back]').forEach(function(b){b.addEventListener('click',function(){go(-1);});});
+
+  (function(){var pressEl=document.getElementById('press');PRESS.forEach(function(p){var a=document.createElement('a');a.textContent=p.name;a.href=p.url.startsWith('https://')||p.url==='#'?p.url:'#';a.target='_blank';a.rel='noopener';pressEl.appendChild(a);});})();
+
+  // ---- telefone: país + máscara + validação ----
+  var COUNTRIES=[
+    {c:'BR',d:'55',f:'🇧🇷',min:10,max:11,mask:'br'},
+    {c:'PT',d:'351',f:'🇵🇹',min:9,max:9,mask:'gen'},
+    {c:'US',d:'1',f:'🇺🇸',min:10,max:10,mask:'us'},
+    {c:'AR',d:'54',f:'🇦🇷',min:10,max:11,mask:'gen'},
+    {c:'PY',d:'595',f:'🇵🇾',min:9,max:9,mask:'gen'},
+    {c:'UY',d:'598',f:'🇺🇾',min:8,max:9,mask:'gen'},
+    {c:'ES',d:'34',f:'🇪🇸',min:9,max:9,mask:'gen'},
+    {c:'GB',d:'44',f:'🇬🇧',min:10,max:10,mask:'gen'},
+    {c:'',d:'',f:'🌎',min:6,max:15,mask:'gen'}
+  ];
+  var ddi=document.getElementById('ddi'), whatsEl=document.getElementById('whats'), whatsNote=document.getElementById('whatsNote');
+  ddi.innerHTML=COUNTRIES.map(function(c,i){return '<option value="'+i+'">'+c.f+' '+(c.d?'+'+c.d:'Outro')+'</option>';}).join('');
+  function curCountry(){return COUNTRIES[+ddi.value||0];}
+  function maskPhone(d,country){
+    if(country.mask==='br'){ // (11) 91234-5678
+      if(d.length<=2)return d.length?'('+d:'';
+      if(d.length<=6)return '('+d.slice(0,2)+') '+d.slice(2);
+      if(d.length<=10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);
+      return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7,11);
+    }
+    if(country.mask==='us'){ // (123) 456-7890
+      if(d.length<=3)return d;
+      if(d.length<=6)return '('+d.slice(0,3)+') '+d.slice(3);
+      return '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6,10);
+    }
+    return d;
+  }
+  function phoneDigits(){return digits(whatsEl.value);}
+  function phoneOk(){var c=curCountry(),n=phoneDigits().length;return n>=c.min&&n<=c.max;}
+  function fmtPhone(){var c=curCountry(),d=phoneDigits().slice(0,c.max);whatsEl.value=maskPhone(d,c);}
+  function whatsE164(){return '+'+(curCountry().d||'')+phoneDigits();}
+  whatsEl.addEventListener('input',function(){
+    fmtPhone(); validate();
+    var has=phoneDigits().length>0, ok=phoneOk();
+    whatsEl.classList.toggle('ok',ok);
+    whatsEl.classList.toggle('err',has&&!ok);
+    whatsNote.classList.toggle('show',has&&!ok);
+  });
+  ddi.addEventListener('change',function(){fmtPhone();whatsEl.dispatchEvent(new Event('input'));whatsEl.focus();});
+  document.querySelectorAll('.wa-link').forEach(function(a){a.addEventListener('click',function(){track('wa_click');});});
+
+  var sticky=document.getElementById('sticky');
+  function visivel(el){if(!el)return false;var r=el.getBoundingClientRect();return r.top<window.innerHeight-40&&r.bottom>80;}
+  function stickyTick(){
+    var on = FLOW[idx]==='result'
+      && (window.scrollY||document.documentElement.scrollTop)>360
+      && !visivel(document.getElementById('waBtn'))
+      && !visivel(document.getElementById('finalCta'));
+    sticky.classList.toggle('show',on);
+    document.body.classList.toggle('sticky-on',on);
+  }
+  window.addEventListener('scroll',stickyTick,{passive:true});
+
+  /* ===== resultado: toque para revelar (blocos bloqueados ficam embaçados) ===== */
+  var REDUCE=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var readBar=document.getElementById('readProgress'), lockedlist=[];
+  function unlockBlock(o){
+    o.el.classList.remove('lockedblk'); o.el.classList.add('revealed');
+    o.ov.classList.add('gone');
+    setTimeout(function(){ if(o.ov.parentNode) o.ov.parentNode.removeChild(o.ov); },460);
+    try{ track('result_unlock',{block:o.el.getAttribute('data-lock')||''}); }catch(_){}
+    requestAnimationFrame(resultFx);
+  }
+  function lockBlock(el){
+    var label=el.getAttribute('data-lock'); if(!label) return;
+    if(el.parentNode && el.parentNode.classList.contains('lockwrap')) return;
+    var wrap=document.createElement('div'); wrap.className='lockwrap';
+    el.parentNode.insertBefore(wrap,el); wrap.appendChild(el);
+    el.classList.add('lockedblk'); el.classList.remove('revealed');
+    var ov=document.createElement('button'); ov.type='button'; ov.className='unlock'; ov.setAttribute('aria-label',label);
+    ov.innerHTML='<span class="upill"><span class="uic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="#1a1404" stroke-width="1.8"/><circle cx="12" cy="12" r="2.6" fill="#1a1404"/></svg></span>'+label+'</span>';
+    var o={el:el,wrap:wrap,ov:ov};
+    ov.addEventListener('click',function(){ unlockBlock(o); });
+    wrap.appendChild(ov); lockedlist.push(o);
+  }
+  function setupResultFx(){
+    var rs=sec('result'); if(!rs) return;
+    var blocks=Array.prototype.slice.call(rs.querySelectorAll('.focusable[data-lock]')).filter(function(el){return el.offsetParent!==null;});
+    if(REDUCE){ blocks.forEach(function(el){el.classList.add('revealed');}); return; }
+    blocks.forEach(lockBlock);
+  }
+  function clearResultFx(){
+    lockedlist.forEach(function(o){
+      o.el.classList.remove('lockedblk','revealed');
+      if(o.ov&&o.ov.parentNode) o.ov.parentNode.removeChild(o.ov);
+      if(o.wrap&&o.wrap.parentNode){ o.wrap.parentNode.insertBefore(o.el,o.wrap); o.wrap.parentNode.removeChild(o.wrap); }
+    });
+    lockedlist=[];
+    if(readBar&&readBar.firstElementChild) readBar.firstElementChild.style.width='0%';
+  }
+  function resultFx(){
+    if(FLOW[idx]!=='result') return;
+    var sc=window.scrollY||document.documentElement.scrollTop||0;
+    var docH=(document.documentElement.scrollHeight||0)-window.innerHeight;
+    var frac=docH>0?Math.min(1,Math.max(0,sc/docH)):0;
+    if(readBar&&readBar.firstElementChild) readBar.firstElementChild.style.width=(frac*100).toFixed(2)+'%';
+  }
+  var fxTick=false;
+  window.addEventListener('scroll',function(){
+    if(fxTick) return; fxTick=true;
+    requestAnimationFrame(function(){ resultFx(); fxTick=false; });
+  },{passive:true});
+  window.addEventListener('resize',resultFx,{passive:true});
+
+  /* ===== fechamento: aviso de saída (desktop) + encaminhamento automático (mobile) ===== */
+  var IS_MOBILE = window.matchMedia('(max-width:768px)').matches || (window.matchMedia('(pointer:coarse)').matches && window.innerWidth<900);
+  var RD_SECS = 30; // segundos até encaminhar no celular
+
+  // -- aviso de saída (exit-intent, desktop) --
+  var exitModal=document.getElementById('exitModal'), exitShown=false, exitArmed=false;
+  function showExit(){ if(exitShown || FLOW[idx]!=='result') return; exitShown=true; exitModal.classList.add('show'); try{track('exit_intent_show');}catch(_){} }
+  function hideExit(){ exitModal.classList.remove('show'); }
+  function exitMouse(e){ if(FLOW[idx]!=='result'||exitShown) return; if(e.clientY<=0 && !e.relatedTarget){ showExit(); } }
+  function armExit(){ if(exitArmed||IS_MOBILE) return; exitArmed=true; document.addEventListener('mouseout',exitMouse); }
+  function disarmExit(){ exitArmed=false; document.removeEventListener('mouseout',exitMouse); }
+  document.getElementById('exitClose').addEventListener('click',hideExit);
+  exitModal.addEventListener('click',function(e){ if(e.target===exitModal) hideExit(); });
+  document.getElementById('exitGo').addEventListener('click',function(){ try{track('exit_intent_cta');}catch(_){} });
+
+  // -- encaminhamento automático (mobile) --
+  var rdTimer=null, rdLeft=RD_SECS, rdNum=document.getElementById('rdNum');
+  function startRedirect(){
+    if(!IS_MOBILE) return;
+    stopRedirect(); rdLeft=RD_SECS; if(rdNum) rdNum.textContent=rdLeft;
+    document.body.classList.add('rd-on');
+    rdTimer=setInterval(function(){
+      rdLeft--; if(rdNum) rdNum.textContent=Math.max(0,rdLeft);
+      if(rdLeft<=0){ stopRedirect(); try{track('auto_redirect');}catch(_){} window.location.href=WA_URL; }
+    },1000);
+  }
+  function stopRedirect(){ if(rdTimer){clearInterval(rdTimer);rdTimer=null;} document.body.classList.remove('rd-on'); }
+  function rdBump(){ if(rdTimer){ rdLeft=RD_SECS; if(rdNum) rdNum.textContent=rdLeft; } } // rolar/ler renova o tempo
+  window.addEventListener('scroll',rdBump,{passive:true});
+  window.addEventListener('touchstart',rdBump,{passive:true});
+  document.getElementById('rdCancel').addEventListener('click',function(){ stopRedirect(); try{track('auto_redirect_cancel');}catch(_){} });
+  document.getElementById('rdGo').addEventListener('click',stopRedirect);
+  if(SPECIALIST.nome||SPECIALIST.foto){
+    var sc=document.getElementById('specCard'); sc.style.display='flex';
+    if(SPECIALIST.foto){document.getElementById('specFoto').src=SPECIALIST.foto;}else{document.getElementById('specFoto').style.display='none';}
+    document.getElementById('specNome').textContent='Quem te recebe: '+(SPECIALIST.nome||'');
+    document.getElementById('specCargo').textContent=SPECIALIST.cargo||'';
+  }
+
+  function px(){
+    var r=document.getElementById('pxReturn'),i=document.getElementById('pxInfl'),a=document.getElementById('pxAluguel');
+    return{ret:(r?+r.value:14.25||14.25)/100,infl:(i?+i.value:4.5||4.5)/100,aluguel:(a?+a.value:0.4||0.4)/100};
+  }
+
+  function compute(){
+    var p=px();
+    var iNom=Math.pow(1+p.ret,1/12)-1;
+    var realA=(1+p.ret)/(1+p.infl)-1, iReal=Math.pow(1+realA,1/12)-1;
+    var idade=data.idade||40;
+    function fv(anos){var n=anos*12,l=data.patrimonio*Math.pow(1+iNom,n),a=iNom>0?data.aporte*((Math.pow(1+iNom,n)-1)/iNom):data.aporte*n;return l+a;}
+    var rendaHoje=data.patrimonio*iReal;
+    var global=data.patrimonio+data.imoveis;
+
+    var heroLabel,heroBig,note,second=null,anosBase;
+    // [A/B emoção] revelação: traduz o número na VIDA que ele compra (eu-futuro / Hershfield)
+    if(idade<40){ anosBase=20; var fv20=fv(20);
+      heroLabel='Patrimônio que você pode construir em 20 anos'; heroBig=fv20;
+      // era: 'Aos '+(idade+20)+' anos — gerando cerca de <b>'+fmt(fv20*iReal)+' por mês</b> sem tocar no principal.'
+      note='Aos '+(idade+20)+', são cerca de <b>'+fmt(fv20*iReal)+' por mês</b> sem encostar no principal — a liberdade de decidir se ainda <i>quer</i> trabalhar.';
+    } else if(idade<50){ anosBase=15; var fv15=fv(15);
+      heroLabel='Renda mensal que você pode ter em 15 anos'; heroBig=fv15*iReal;
+      // era: 'Aos '+(idade+15)+' anos, com cerca de <b>'+fmt(fv15)+'</b> acumulados — e a renda vira vitalícia.'
+      note='Aos '+(idade+15)+' — um salário que cai todo mês, para sempre, e não depende de chefe nem de mercado. Sobre cerca de <b>'+fmt(fv15)+'</b> acumulados.';
+    } else { anosBase=15; var fv15b=fv(15);
+      heroLabel='Renda mensal que seu patrimônio já pode gerar'; heroBig=rendaHoje;
+      second={label:'E em 15 anos, mantendo os aportes',value:fv15b*iReal};
+      // era: 'O que você já tem pode virar renda <b>agora</b> — e saltar em 15 anos mantendo os aportes.'
+      note='Pode virar renda <b>agora</b>, sem vender o que você construiu — e crescer ainda mais em 15 anos mantendo os aportes.';
+    }
+    var perfilNome = (global>=5000000)?'Perfil patrimonial':(idade<40?'Construtor de patrimônio':(idade<50?'Em transição para a renda':'Gerador de renda'));
+    document.getElementById('plabel').textContent=perfilNome;
+    document.getElementById('heroLabel').textContent=heroLabel;
+    document.getElementById('heroNote').innerHTML=note;
+    animate(document.getElementById('heroBig'),heroBig);
+    var sw=document.getElementById('heroSecondWrap');
+    if(second){sw.style.display='block';document.getElementById('heroLabel2').textContent=second.label;animate(document.getElementById('heroBig2'),second.value);} else sw.style.display='none';
+
+    // custo honesto de adiar 12 meses (mesma data final, começo um ano depois)
+    var fvBase=fv(anosBase);
+    var custoEspera=fvBase-fv(anosBase-1);
+    document.getElementById('waitLine').innerHTML = (data.aporte>0||data.patrimonio>0)
+      ? 'Adiar o início em 12 meses custa cerca de <b>'+fmt(custoEspera)+'</b> do seu resultado final.'
+      : '';
+    document.getElementById('closingLoss').innerHTML = (data.aporte>0||data.patrimonio>0)
+      ? 'Cada 12 meses de espera custam cerca de <b>'+fmt(custoEspera)+'</b> do seu resultado final. O melhor dia para começar já passou — o segundo melhor é hoje.'
+      : '';
+
+    var r=build(idade,global,anosBase);
+    track('result_view',{score:r.score,prioridade:r.tier.label});
+    var primeiro=(data.nome||'').split(' ')[0];
+    document.getElementById('leadin').innerHTML = primeiro
+      ? '<em>'+esc(primeiro)+'</em>, '+r.leadin.charAt(0).toLowerCase()+r.leadin.slice(1)
+      : r.leadin;
+    document.getElementById('callout').innerHTML=r.callout||'';
+    document.getElementById('paths').innerHTML=r.paths.map(function(x,i){
+      return '<div class="planstep">'
+        +'<div class="planstep-h"><span class="pnum">'+(i+1)+'</span>'
+        +'<div class="planstep-ht"><span class="ptit">'+x.name+'</span>'
+        +(x.essence?'<small>'+x.essence+'</small>':'')+'</div></div>'
+        +'<div class="planstep-body">'+x.copy
+        +(x.guar?'<span class="pguar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" stroke="#8F7427" stroke-width="1.6"/></svg>Garantia de 100% do dinheiro de volta</span>':'')
+        +'</div></div>';
+    }).join('');
+
+    var ib=document.getElementById('imovelBlock');
+    if(data.imoveis>0){ ib.style.display='block';
+      var aluguel=data.imoveis*p.aluguel, liq=aluguel*0.78, invest=data.imoveis*iReal, dif=invest-liq;
+      document.getElementById('imovelStats').innerHTML=[
+        ['Aluguel bruto estimado',fmt(aluguel)+'/mês'],
+        ['Aluguel líquido (após IR, vacância, custos)',fmt(liq)+'/mês'],
+        ['Mesmo valor investido',fmt(invest)+'/mês','gold']
+      ].map(function(s){return '<div class="stat-row"><span class="k">'+s[0]+'</span><span class="v '+(s[2]||'')+'">'+s[1]+'</span></div>';}).join('');
+      document.getElementById('imovelNote').innerHTML = dif>0
+        ? 'Com a Selic em '+(Math.round(p.ret*10000)/100).toString().replace('.',',')+'%, o mesmo valor investido renderia cerca de '+fmt(dif)+' a mais por mês — com liquidez e sem inquilino. Não é uma ordem de venda; é um número que merece análise.'
+        : 'Nesse cenário, o imóvel se defende bem. Vale análise para decidir entre manter, rentabilizar melhor ou diversificar.';
+    } else ib.style.display='none';
+
+    var aportado=data.patrimonio+data.aporte*anosBase*12;
+    document.getElementById('stats').innerHTML=[
+      ['Horizonte considerado',anosBase+' anos'],
+      ['Total que você vai aportar',fmt(aportado)],
+      ['Patrimônio projetado',fmt(fvBase),'gold'],
+      ['Ganho de juros sobre juros',fmt(fvBase-aportado)],
+      ['Renda passiva ao final',fmt(fvBase*iReal)+'/mês','gold'],
+      ['O custo de adiar 12 meses','− '+fmt(custoEspera),'loss']
+    ].map(function(s){return '<div class="stat-row"><span class="k">'+s[0]+'</span><span class="v '+(s[2]||'')+'">'+s[1]+'</span></div>';}).join('');
+
+    // gráfico: a curva do plano vs guardar sem investir
+    function fmtShort(n){ if(n>=1e6) return 'R$ '+(n/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi'; if(n>=1e3) return 'R$ '+Math.round(n/1e3).toLocaleString('pt-BR')+' mil'; return fmt(n);}
+    var cw=document.getElementById('chartWrap');
+    if(fvBase>1000){
+      cw.style.display='block';
+      var W=560,H=232,padL=8,padR=92,padT=14,padB=26;
+      var iw=W-padL-padR, ih=H-padT-padB, N=anosBase;
+      var plan=[],flat=[];
+      for(var t=0;t<=N;t++){plan.push(fv(t));flat.push(data.patrimonio+data.aporte*12*t);}
+      var ymax=plan[N]*1.06||1;
+      function Xc(t){return padL+iw*t/N;}
+      function Yc(v){return padT+ih*(1-v/ymax);}
+      function pathOf(a){return a.map(function(v,t){return (t?'L':'M')+Xc(t).toFixed(1)+' '+Yc(v).toFixed(1);}).join(' ');}
+      var grid='';
+      [0.5,1].forEach(function(g){var y=Yc(ymax*g);
+        grid+='<line x1="'+padL+'" y1="'+y.toFixed(1)+'" x2="'+(padL+iw)+'" y2="'+y.toFixed(1)+'" stroke="#EFEAE0" stroke-width="1"/>';
+        grid+='<text x="'+(padL+iw+8)+'" y="'+(y+4).toFixed(1)+'" font-size="11.5" fill="#7A7260">'+fmtShort(ymax*g)+'</text>';
+      });
+      var area=pathOf(plan)+' L'+Xc(N).toFixed(1)+' '+Yc(0).toFixed(1)+' L'+Xc(0).toFixed(1)+' '+Yc(0).toFixed(1)+' Z';
+      var svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Projeção do patrimônio ao longo do tempo">'
+        +'<defs><linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E7F4F" stop-opacity=".26"/><stop offset="1" stop-color="#1E7F4F" stop-opacity="0"/></linearGradient></defs>'
+        +grid
+        +'<path d="'+area+'" fill="url(#gfill)"/>'
+        +'<path d="'+pathOf(flat)+'" fill="none" stroke="#B9B19E" stroke-width="2" stroke-dasharray="5 5"/>'
+        +'<path d="'+pathOf(plan)+'" fill="none" stroke="#1E7F4F" stroke-width="2.5" stroke-linecap="round"/>'
+        +'<circle cx="'+Xc(N).toFixed(1)+'" cy="'+Yc(plan[N]).toFixed(1)+'" r="4.5" fill="#1E7F4F"/>'
+        +'<text x="'+padL+'" y="'+(H-6)+'" font-size="11.5" fill="#7A7260">hoje</text>'
+        +'<text x="'+(padL+iw)+'" y="'+(H-6)+'" font-size="11.5" fill="#7A7260" text-anchor="end">em '+N+' anos</text>'
+        +'</svg>';
+      document.getElementById('chart').innerHTML=svg;
+    } else cw.style.display='none';
+
+    // barra: quem constrói o resultado — você ou os juros
+    var sw2=document.getElementById('splitWrap');
+    if(fvBase>0&&aportado>0&&fvBase>aportado){
+      sw2.style.display='block';
+      var pj=Math.max(1,Math.min(99,Math.round((fvBase-aportado)/fvBase*100)));
+      var pa=100-pj;
+      document.getElementById('splitBar').innerHTML='<div style="width:'+pa+'%;background:#D8D1C0"></div><div style="width:'+pj+'%;background:#1E7F4F"></div>';
+      document.getElementById('splitLbl').innerHTML='<span>Você aporta <b>'+fmt(aportado)+'</b> ('+pa+'%)</span><span style="color:var(--pos)">Os juros constroem <b>'+fmt(fvBase-aportado)+'</b> ('+pj+'%)</span>';
+    } else sw2.style.display='none';
+
+    // os dois futuros, de relance
+    var cb=document.getElementById('cmpBlock');
+    if(fvBase>1000&&fvBase>aportado){
+      cb.style.display='block';
+      var primeiroNome=(data.nome||'').split(' ')[0];
+      document.getElementById('cmpTitle').textContent = primeiroNome ? (primeiroNome+', os seus dois futuros de relance') : 'Os seus dois futuros, de relance';
+      document.getElementById('cmpCom').innerHTML=
+        '<div class="cmp-row"><div class="cmp-num">'+fmt(fvBase)+'</div><div class="cmp-lbl">patrimônio em '+anosBase+' anos</div></div>'+
+        '<div class="cmp-row"><div class="cmp-num">'+fmt(fvBase*iReal)+'</div><div class="cmp-lbl">de renda, todo mês</div></div>';
+      document.getElementById('cmpSem').innerHTML=
+        '<div class="cmp-row"><div class="cmp-num">'+fmt(aportado)+'</div><div class="cmp-lbl">guardado em '+anosBase+' anos</div></div>'+
+        '<div class="cmp-row"><div class="cmp-num">R$ 0</div><div class="cmp-lbl">de renda que se sustenta</div></div>';
+      document.getElementById('cmpDiff').innerHTML='O plano coloca <b>+ '+fmt(fvBase-aportado)+'</b> no seu lado da mesa.';
+    } else cb.style.display='none';
+
+    var primeiro=(data.nome||'').split(' ')[0];
+    document.getElementById('rTitle').textContent = primeiro ? (primeiro+', aqui está o seu plano') : r.headline;
+    var waHref=WA_URL;
+    document.querySelectorAll('.wa-link').forEach(function(a){a.href=waHref;});
+
+    var payload={
+      lead_source:'funil_diagnostico', versao:'v6', created_at:new Date().toISOString(),
+      nome:data.nome, whatsapp:whatsE164(), email:data.email,
+      idade:idade, aporte_mensal:data.aporte, patrimonio_investido:data.patrimonio, imoveis:data.imoveis,
+      patrimonio_global:global, objetivo:data.objetivo, preocupacoes:data.concerns, momento:data.momento, conhecimento:data.conhecimento,
+      perfil_patrimonial:isPatrimonial(), perfil_label:perfilNome, patrimonio_projetado:Math.round(fvBase),
+      renda_projetada_mensal:Math.round(fvBase*iReal), score:r.score, prioridade:r.tier.label, tags:r.tags,
+      utms:utms
+    };
+    var payloadEl=document.getElementById('payload'); if(payloadEl)payloadEl.textContent=JSON.stringify(payload,null,2);
+    var tb=document.getElementById('tierBadge'); if(tb){tb.textContent=r.tier.label;tb.className='tier '+r.tier.cls;}
+    var snEl=document.getElementById('scoreNum'); if(snEl)snEl.textContent='score '+r.score+'/119';
+    var kvsEl=document.getElementById('kvs'); if(kvsEl)kvsEl.innerHTML=[
+      ['nome',esc(data.nome||'—')],['whatsapp',esc(data.whats||'—')],['email',esc(data.email||'—')],['idade',idade],
+      ['aporte_mensal',fmt(data.aporte)],['patrimonio_investido',fmt(data.patrimonio)],['imoveis',fmt(data.imoveis)],
+      ['patrimonio_global',fmt(global)],['objetivo',data.objetivo],['conhecimento',data.conhecimento||'—'],['preocupacoes',data.concerns.join(', ')||'—'],['momento',data.momento||'—']
+    ].map(function(k){return '<div class="kv"><span class="k">'+k[0]+'</span><span class="v2">'+k[1]+'</span></div>';}).join('');
+    var tagsEl=document.getElementById('tags'); if(tagsEl)tagsEl.innerHTML=r.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('');
+    if(SALESFORCE_WEBHOOK && ENVIRONMENT==='prod'){
+      try{ fetch(SALESFORCE_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}); }catch(e){}
+    }
+  }
+
+  function build(idade,global,anos){
+    var P=data.patrimonio,A=data.aporte,C=data.concerns;
+    var pat=isPatrimonial(), privado=global>=5000000, holding=data.imoveis>=2000000||C.indexOf('sucessao')>=0;
+    var objTxt=data.objetivo==='renda'?'a renda que você quer':(data.objetivo==='crescer'?'o patrimônio que você projeta':'crescer agora e viver de renda no destino');
+    var paths=[], tags=['alvo:escola'], callout='';
+    var leadin='A matemática está do seu lado. O que falta é <em>método</em> — e método se aprende.';
+
+    var altoValor=pat||A>=10000||P>=300000;
+
+    // 1º passo é SEMPRE educação — com a justificativa certa para cada caso
+    var escolaCopy='Em 8 semanas, você sai do zero e aprende a <b>investir por conta própria</b>, no Brasil e no exterior: montar carteira, escolher ativos, declarar imposto e nunca mais depender de gerente de banco. Método que já formou mais de 36 mil investidores.';
+    if(altoValor) escolaCopy='Pode parecer estranho uma consultoria recomendar que você estude primeiro — é proposital. Quanto maior o patrimônio, mais caro sai cada decisão delegada às cegas. Na Escola você aprende a <b>avaliar qualquer recomendação que receber — inclusive as nossas</b>. Cliente educado ninguém engana, e é com ele que fazemos o melhor trabalho.';
+    if(data.objetivo==='renda'&&!altoValor) escolaCopy='Viver de renda é uma habilidade, não um produto que se compra. Na Escola você aprende a <b>construir e gerir a própria carteira de renda</b> — escolher pagadores, reinvestir e declarar — para que a renda dependa de você, e não de quem te vende.';
+    if(data.conhecimento==='avancado') escolaCopy='Você quer profissionalizar como investe — e é aqui que a maioria estaciona. Para o seu nível, o valor está nos <b>módulos avançados e nas lives semanais</b>: internacional, proteção de carteira, otimização tributária. Investidor que para de estudar vira investidor mediano.';
+    if(data.conhecimento==='intermediario') escolaCopy='Você já investe, mas sente falta de <b>consistência e clareza</b> — e isso quase nunca é falta de informação, é falta de método. A Escola organiza o que você já faz num processo só, do aporte à declaração, para o resultado parar de depender de sorte.';
+    if(data.conhecimento==='perdido') escolaCopy='Você já tentou e travou no caminho — é o ponto mais comum, e o mais resolvível. A Escola te dá <b>um passo a passo do zero ao avançado</b>, na ordem certa, para você não se perder de novo e finalmente seguir sozinho.';
+    if(C.indexOf('dividas')>=0){ escolaCopy='Você marcou dívidas — e o primeiro passo não é pegar mais crédito, é <b>virar o jogo do seu dinheiro</b>: na Escola você reorganiza o orçamento, monta a estratégia para sair dos juros e aprende a investir o que libera. É a base de tudo.'; tags.push('tem:dividas'); }
+    paths.push({name:'Aprender a fazer por conta própria',tag:'Escola',essence:'O critério para nunca mais depender de ninguém — nem de nós.',copy:escolaCopy,guar:true});
+
+    // investidor experiente: a plataforma é o passo natural seguinte
+    var experiente = data.conhecimento==='avancado' || (data.conhecimento==='intermediario' && data.momento==='sozinho');
+    if(experiente){
+      paths.push({name:'Investir onde você não é o produto',tag:'Plataforma AUVP',essence:'O aluguel das suas ações de verdade — e renda fixa sem taxa escondida.',copy:'Nas corretoras tradicionais, você fica com cerca de <b>30% do aluguel das suas próprias ações</b> — e nos bancos digitais elas mal são alugadas. Na renda fixa, o spread embutido no preço corrói o retorno sem aparecer em extrato nenhum. Na plataforma AUVP é diferente: <b>o aluguel das suas ações trabalha para você</b>, e o preço da renda fixa é o que você vê — sem taxa escondida.',guar:false});
+      tags.push('alvo:plataforma','perfil:experiente');
+    }
+
+    if(altoValor){
+      var consCopy='A educação te dá o critério; um consultor dedicado te devolve <b>tempo e execução</b>: monta e acompanha sua carteira, define a alocação certa para '+objTxt+', rebalanceia quando o mercado muda e corta custos e impostos escondidos — respondendo a você, não a um banco que ganha comissão sobre o que te vende.';
+      if(C.indexOf('rentabilidade')>=0) consCopy='Você sente que seu dinheiro rende menos do que poderia — e provavelmente está certo. Com o critério que a Escola te dá, um consultor dedicado <b>audita sua carteira atual</b>, encontra as taxas e produtos que corroem seu retorno, e remonta a alocação para extrair mais do mesmo patrimônio, com risco sob controle.';
+      if(C.indexOf('diversificar')>=0) consCopy='Concentração é o risco silencioso: poucos ativos, um banco só, ou tudo em imóveis. Um consultor dedicado <b>redistribui seu patrimônio</b> entre classes, moedas e geografias — e você, educado, entende e valida cada movimento.';
+      if(C.indexOf('renda_ativos')>=0) consCopy='Transformar patrimônio em renda é uma engenharia: ativos pagadores certos, vencimentos escalonados, imposto otimizado em cada real recebido. Um consultor dedicado <b>desenha esse fluxo de renda</b> para a sua vida — e você, sabendo avaliar, dorme tranquilo.';
+      paths.push({name:'Um consultor conduzindo com você',tag:'Consultoria',essence:'Execução profissional do plano, respondendo só a você.',copy:consCopy,guar:true});
+      tags.push('alvo:consultoria','prioridade:alta');
+    }
+
+    if(C.indexOf('comprar_imovel')>=0){
+      paths.push({name:'Conquistar o imóvel sem se descapitalizar',tag:'Crédito',essence:'A melhor taxa entre 20+ bancos, sem gastar o capital.',copy:'Nossa equipe <b>disputa sua taxa em mais de 20 bancos</b> e traz a melhor condição de financiamento — assim seu capital continua investido e rendendo, em vez de sair de uma vez. Você compara as propostas e escolhe; a negociação é por nossa conta.',guar:false});
+      tags.push('quer:imovel');
+    }
+    if(C.indexOf('proteger_familia')>=0||(idade<40&&P<30000&&!pat)){
+      paths.push({name:'Proteger quem depende de você',tag:'Proteção',essence:'Um imprevisto não pode desfazer o plano.',copy:'Mapeamos o que sua família precisaria se você faltasse e <b>estruturamos o seguro certo</b> — cobertura na medida, sem pagar por excesso. O patrimônio cresce com tempo; a proteção precisa existir desde o primeiro dia.',guar:false});
+      tags.push('quer:protecao');
+    }
+    if(C.indexOf('exterior')>=0){
+      paths.push({name:'Patrimônio com passaporte',tag:'Internacional',essence:'Parte do patrimônio em moeda forte, com estrutura.',copy:'Abrimos sua <b>conta internacional de investimentos</b> e estruturamos a dolarização de parte do patrimônio: acesso aos mercados globais, proteção contra o risco Brasil e, quando faz sentido, estrutura offshore eficiente em imposto e sucessão.',guar:false});
+      tags.push('elig:offshore');
+    }
+    if(holding){
+      paths.push({name:'Pagar menos imposto e organizar a sucessão',tag:'Estruturação',essence:'Menos imposto hoje, herança organizada em vida.',copy:'Estruturamos sua <b>holding patrimonial</b>: a renda dos imóveis passa a ser tributada como empresa (em geral bem menos que na pessoa física) e a herança fica organizada em vida — sem inventário longo, caro e público para a sua família.',guar:false});
+      tags.push('elig:holding');
+    }
+    if(privado){
+      callout='<div class="callout"><p class="ctitle">No seu patamar, estrutura preserva mais do que rentabilidade.</p>'+
+        '<p class="ccopy">Com cerca de '+fmt(global)+' em patrimônio global, o que define quanto você mantém é como você se organiza: holding para a renda dos imóveis e a sucessão, conta internacional para investir fora com segurança, e um especialista que conhece o seu caso pelo nome. É exatamente essa conversa que ele vai conduzir com você.</p></div>';
+      tags.push('perfil:patrimonial','elig:offshore','elig:holding','elig:cartao');
+      leadin='Daqui em diante, o jogo é <em>preservar e transferir</em>. Os passos abaixo estão na ordem certa.';
+    }
+
+    var s=0;
+    // patrimônio — faixas finas (sem o penhasco de 100k)
+    s+= global>=10000000?40:global>=5000000?36:P>=1000000?32:P>=500000?29:P>=300000?26:P>=150000?22:P>=100000?19:P>=70000?16:P>=30000?12:P>=10000?8:5;
+    // aporte — faixas finas
+    s+= A>=25000?30:A>=10000?26:A>=5000?21:A>=2500?17:A>=1000?12:A>=500?8:A>=300?5:2;
+    // capacidade de pagar à vista — sinal forte de conversão p/ priorização comercial
+    var avista = A>=1500 || P>=50000 || global>=300000;
+    if(avista){ s+=8; tags.push('capacidade:avista'); }
+    if(global>=1000000) s+=4;
+    if(holding)s+=8; if(C.indexOf('exterior')>=0)s+=6; if(C.indexOf('comprar_imovel')>=0)s+=4;
+    // sinais validados pela base de respostas reais (jun/2026, n=859):
+    // objetivo "construir patrimônio" e "renda" puxam o score; "quitar dívidas" indica lead mais frio
+    s+= (data.objetivo==='crescer')?10:(data.objetivo==='ambos')?8:(data.objetivo==='renda')?6:0;
+    if(C.indexOf('dividas')>=0)s-=5; // dívida esfria, mas pesa menos que antes
+    // conhecimento: quem já investe (sem consistência / quer profissionalizar) converte melhor que iniciante puro
+    s+= (data.conhecimento==='intermediario')?10:(data.conhecimento==='avancado')?9:(data.conhecimento==='perdido')?3:0;
+    if(data.momento==='consultoria')s+=6; if((data.objetivo==='renda'||data.objetivo==='ambos')&&idade>=50)s+=5;
+    // normaliza para a MESMA escala do score anterior (máx. 119) — preserva o referencial do vendedor.
+    // A metodologia diverge (mede patrimônio/aporte, não prontidão de compra), mas a régua de magnitude fica igual.
+    var s100=Math.max(0,Math.min(100,s));
+    s=Math.round(s100*1.19);  // 0–119
+    var tier=s>=81?{label:'ALTA',cls:'alta'}:s>=48?{label:'MÉDIA',cls:'media'}:{label:'BASE',cls:'base'};
+    tags.push('objetivo:'+data.objetivo,'versao:v6','contato:ok');
+
+    var headline=privado?'Seu retrato patrimonial':(pat?'Seu plano':(idade<40?'Sua fase de acúmulo':(idade>=50?'Seu retrato de renda':'Seu caminho até a renda')));
+    return {leadin:leadin,callout:callout,paths:paths,score:s,tier:tier,tags:tags,headline:headline};
+  }
+
+  function animate(el,target){
+    if(window.matchMedia('(prefers-reduced-motion:reduce)').matches){el.innerHTML=fmt(target);return;}
+    var t0=null;function f(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/900);var e=1-Math.pow(1-p,3);el.innerHTML=fmt(target*e);if(p<1)requestAnimationFrame(f);}
+    requestAnimationFrame(f);
+  }
+
+  if(ENVIRONMENT!=='prod'){
+    var panelsEl=document.getElementById('internalPanels');
+    if(panelsEl)panelsEl.style.display='block';
+    var recalcEl=document.getElementById('recalc');
+    if(recalcEl)recalcEl.addEventListener('click',compute);
+  }
+
+  document.getElementById('restart').addEventListener('click',function(){
+    data={idade:35,aporte:0,patrimonio:0,imoveis:0,objetivo:null,concerns:[],momento:null,conhecimento:null,nome:'',whats:'',email:''};
+    ['aporte','patrimonio','imoveis'].forEach(function(k){document.getElementById(k+'Range').value=0;document.getElementById(k+'Val').value='0';document.getElementById(k+'Range').style.setProperty('--fill','0%');var pl=document.getElementById(k+'Plus');if(pl)pl.style.display='none';});
+    var ir=document.getElementById('idadeRange'); ir.value=35; document.getElementById('idadeVal').textContent='35'; ir.style.setProperty('--fill',((35-16)/(85-16)*100).toFixed(1)+'%');
+    ['nome','whats','email'].forEach(function(id){var el=document.getElementById(id);el.value='';el.classList.remove('ok','err');});
+    document.getElementById('ddi').value='0'; document.getElementById('whatsNote').classList.remove('show');
+    document.querySelectorAll('.opt').forEach(function(o){o.classList.remove('sel');});
+    idx=0; showId(FLOW[0]);
+  });
+
+  document.documentElement.classList.remove('js-loading');
+  showId(FLOW[0]);
+})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a51a709398b60c5f',t:'MTc5MzE5NTc0Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="b5e5da3627c90911240c9fe4-|49" defer></script>

@@ -1,0 +1,17 @@
+.vr { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
+.vr-topo { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.vr-topo span { font-family: var(--font-ui); font-size: 13px; color: var(--ink-3); margin-right: auto; }
+.vr-intro { color: var(--ink-2); max-width: 70ch; }
+.vr-intro code { background: var(--surface-2); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+.vr h2 { font-family: var(--font-display); font-weight: 600; font-size: 26px; margin: 34px 0 14px; }
+.vr-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.vr-card, .vr-res { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; gap: 10px; }
+.vr-card { flex-direction: column; }
+.vr-card small, .vr-res small { color: var(--ink-3); font-size: 12.5px; }
+.vr-card span, .vr-res > span { display: flex; gap: 8px; }
+.vr a { display: inline-flex; padding: 6px 12px; border-radius: 9px; background: var(--gold-soft); color: var(--ink); text-decoration: none; font-family: var(--font-ui); font-size: 13px; font-weight: 600; }
+.vr a:hover { background: var(--gold); color: var(--gold-on); }
+.vr-lista { display: grid; gap: 10px; }
+.vr-res { justify-content: space-between; align-items: center; }
+.vr-res p { margin: 4px 0; color: var(--ink-2); font-size: 14px; }
+@media (max-width: 640px) { .vr-res { flex-direction: column; align-items: flex-start; } }
