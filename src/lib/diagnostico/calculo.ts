@@ -267,21 +267,4 @@ function build(data: Respostas, idade: number, global: number) {
   return { passos, tags, score: s, tier, headline, privado };
 }
 
-/**
- * Curva do plano com as respostas parciais (painel que acompanha o fluxo).
- * Mesma conta de fv() e o mesmo horizonte (20 ou 15 anos) do resultado.
- */
-export function serieParcial(data: Pick<Respostas, "idade" | "aporte" | "patrimonio">, p: Premissas = PREMISSAS) {
-  const iNom = Math.pow(1 + p.ret, 1 / 12) - 1;
-  const anos = (data.idade || 40) < 40 ? 20 : 15;
-  const plano: number[] = [];
-  const guardado: number[] = [];
-  for (let t = 0; t <= anos; t++) {
-    const n = t * 12;
-    plano.push(data.patrimonio * Math.pow(1 + iNom, n) + data.aporte * ((Math.pow(1 + iNom, n) - 1) / iNom));
-    guardado.push(data.patrimonio + data.aporte * 12 * t);
-  }
-  return { anos, plano, guardado };
-}
-
 export const primeiroNome =(nome: string) => (nome || "").trim().split(" ")[0];

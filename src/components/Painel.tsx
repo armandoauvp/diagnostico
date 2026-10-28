@@ -13,52 +13,9 @@ import {
   Vault,
   type Icon,
 } from "@phosphor-icons/react";
-import { useId, useRef } from "react";
 import type { Conteudo } from "@/conteudo/tipos";
-import { serieParcial } from "@/lib/diagnostico/calculo";
 import type { EtapaId, Respostas } from "@/lib/diagnostico/tipos";
 import { fmtCurto } from "@/lib/diagnostico/valores";
-import { useTween } from "./base";
-import { proximaEscala } from "./escala";
-
-function useEscala(fim: number) {
-  const ref = useRef(0);
-  ref.current = proximaEscala(ref.current, fim);
-  return ref.current || 1;
-}
-
-export function MiniCurva({ r, w = 300, h = 120, className = "curva" }: { r: Respostas; w?: number; h?: number; className?: string }) {
-  const s = serieParcial(r);
-  // sem nenhum valor ainda, desenha uma curva de exemplo bem baixinha
-  const vazio = s.plano[s.plano.length - 1] <= 0;
-  const base = vazio ? s.plano.map((_, t) => Math.pow(t / s.anos, 2.2) * 0.12) : s.plano;
-  const escala = useEscala(vazio ? 0 : base[base.length - 1]);
-  const max = vazio ? 1 : escala;
-  const plano = useTween(base.map((v) => v / max));
-  const guard = useTween((vazio ? base.map(() => 0) : s.guardado).map((v) => v / max));
-  const id = useId().replace(/:/g, "");
-  // na faixa do celular (40 px de altura) a margem e o ponto encolhem junto
-  const pad = Math.max(5, Math.min(8, h * 0.14));
-  const X = (i: number, n: number) => pad + ((w - pad * 2) * i) / (n - 1);
-  const Y = (v: number) => h - pad - (h - pad * 2) * Math.min(1, Math.max(0, v));
-  const linha = (a: number[]) => a.map((v, i) => (i ? "L" : "M") + X(i, a.length).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
-  const area = linha(plano) + ` L${X(plano.length - 1, plano.length)} ${h - pad} L${pad} ${h - pad} Z`;
-  const ult = plano[plano.length - 1] ?? 0;
-  return (
-    <svg className={className} viewBox={`0 0 ${w} ${h}`} aria-hidden>
-      <defs>
-        <linearGradient id={`g${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="var(--gold)" stopOpacity={vazio ? 0.12 : 0.35} />
-          <stop offset="1" stopColor="var(--gold)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill={`url(#g${id})`} />
-      {!vazio && <path d={linha(guard)} fill="none" stroke="var(--guardado)" strokeWidth="1.6" strokeDasharray="4 4" />}
-      <path d={linha(plano)} fill="none" stroke="var(--gold)" strokeWidth={vazio ? 1.5 : 2.6} strokeLinecap="round" opacity={vazio ? 0.5 : 1} />
-      {!vazio && <circle cx={X(plano.length - 1, plano.length)} cy={Y(ult)} r={h < 60 ? 3 : 4} fill="var(--gold)" />}
-    </svg>
-  );
-}
 
 type Linha = { k: keyof Conteudo["painel"]["linhas"]; icon: Icon; etapa: EtapaId };
 const LINHAS: Linha[] = [
@@ -72,7 +29,7 @@ const LINHAS: Linha[] = [
   { k: "conhecimento", icon: GraduationCap, etapa: "conhecimento" },
 ];
 
-/** Painel lateral "Seu plano": ecoa as respostas e mostra a curva reagindo. O número fica trancado até o fim. */
+/** Painel lateral "Seu plano": ecoa as respostas. O número e a curva só aparecem no resultado. */
 export function Painel({ c, r, respondidas }: { c: Conteudo; r: Respostas; respondidas: Set<EtapaId> }) {
   const p = c.painel;
   const ops = c.opcoes;
@@ -110,7 +67,6 @@ export function Painel({ c, r, respondidas }: { c: Conteudo; r: Respostas; respo
             {p.status}
           </span>
         </div>
-        <MiniCurva r={r} />
         <ul className="respostas">
           {LINHAS.map((l) => {
             const ok = respondidas.has(l.etapa);
@@ -147,17 +103,5 @@ export function Painel({ c, r, respondidas }: { c: Conteudo; r: Respostas; respo
         </ul>
       </div>
     </aside>
-  );
-}
-
-export function FaixaMovel({ c, r }: { c: Conteudo; r: Respostas }) {
-  return (
-    <div className="faixa-movel" aria-hidden>
-      <MiniCurva r={r} w={120} h={40} />
-      <div>
-        <div className="t">{c.painel.movelTitulo}</div>
-        <div className="s">{c.painel.movelSub}</div>
-      </div>
-    </div>
   );
 }

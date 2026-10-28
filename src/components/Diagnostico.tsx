@@ -11,13 +11,11 @@ import { alternaPreocupacao, contador, etapaValida, FLOW, mover, RESPOSTAS_INICI
 import { PRESETS } from "@/lib/diagnostico/presets";
 import type { EtapaId, Preocupacao, Respostas, Variante } from "@/lib/diagnostico/tipos";
 import { Calculando } from "./Calculando";
-import { FaixaMovel, Painel } from "./Painel";
+import { Painel } from "./Painel";
 import { Resultado } from "./Resultado";
 import { Abaixo, Cabecalho, Destaques, FormContato, Navegacao, Opcoes, SliderDinheiro, SliderIdade } from "./Telas";
 import { Topo } from "./Topo";
 import { Rich } from "./base";
-
-const VALOR: EtapaId[] = ["idade", "aporte", "patrimonio", "imoveis"];
 
 export function Diagnostico({ variante }: { variante: Variante }) {
   const { conteudo: c, recursos } = VARIANTES[variante];
@@ -266,7 +264,6 @@ export function Diagnostico({ variante }: { variante: Variante }) {
       <Topo nome={c.marca.nome} contador={contador(idx)} idx={idx} />
       <main className="palco com-painel">
         <div className="coluna">
-          {VALOR.includes(etapa) && <FaixaMovel c={c} r={r} />}
           <section key={tela} className={"card etapa" + (dir < 0 ? " volta" : "")} aria-labelledby="titulo-etapa">
             <Cabecalho t={t} />
             {corpo}

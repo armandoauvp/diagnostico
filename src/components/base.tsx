@@ -68,36 +68,3 @@ export function useVisto<T extends Element>(margem = "0px 0px -12% 0px") {
   }, [margem, visto]);
   return [ref, visto] as const;
 }
-
-/** Interpola uma lista de números até o novo alvo (para a curva do painel). */
-export function useTween(alvo: number[], ms = 420) {
-  const [v, setV] = useState(alvo);
-  const atual = useRef(alvo);
-  const reduz = useReduzMovimento();
-  // precisão fina: a curva chega normalizada (0–1), então arredondar para inteiro a congelava
-  const chave = alvo.map((n) => n.toFixed(4)).join(",");
-  useEffect(() => {
-    const de = atual.current;
-    const para = alvo;
-    if (reduz || de.length !== para.length) {
-      atual.current = para;
-      setV(para);
-      return;
-    }
-    let raf = 0;
-    let t0: number | null = null;
-    const f = (t: number) => {
-      if (t0 === null) t0 = t;
-      const p = Math.min(1, (t - t0) / ms);
-      const e = 1 - Math.pow(1 - p, 3);
-      const nv = para.map((x, i) => de[i] + (x - de[i]) * e);
-      atual.current = nv;
-      setV(nv);
-      if (p < 1) raf = requestAnimationFrame(f);
-    };
-    raf = requestAnimationFrame(f);
-    return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chave, ms, reduz]);
-  return v;
-}

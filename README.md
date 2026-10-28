@@ -62,7 +62,7 @@ Para mudar a copy, mexa só em `src/conteudo/`. O negrito e o itálico ficam em 
   - O envio vai para `/api/lead`, que repassa ao n8n no servidor. A URL do webhook sai do código do navegador.
   - O payload tem um campo novo, `variante_design` (`a` ou `b`), para o teste A/B. Os outros campos e o `versao: "v6"` ficaram iguais, para não quebrar o mapeamento do n8n. Os eventos de funil também levam `variante_design`.
 - **Telas novas no visual:**
-  - O painel "Seu plano" acompanha as respostas: no computador fica ao lado das perguntas e, no celular, aparece como uma faixa nas telas de valor. A curva reage ao slider, mas o número continua trancado até o fim.
+  - O painel "Seu plano" acompanha as respostas no computador, ao lado das perguntas. Ele só repete o que a pessoa respondeu: o número e a curva aparecem apenas no resultado. No celular, o painel não aparece.
   - Cada passo do plano mostra a etiqueta do produto (Escola, Consultoria…). Esse dado já existia no código da v6, mas não aparecia.
 - **Sobretítulos:** saíram de todas as telas, nas duas versões, porque repetiam o título, o contador ou o selo do resultado: "Sobre você", "Capacidade", "Ponto de partida", "Imóveis", "Seu momento", "Última pergunta", "Seu nível", "Diagnóstico concluído" (contato) e "Um instante" (cálculo). O da abertura ("Diagnóstico patrimonial AUVP") virou o nome da ferramenta no topo, ao lado da logo ("Diagnóstico patrimonial"), e aparece em todas as telas.
 - **Logo:** sempre monocromática, com olho e texto na mesma cor: escura no tema claro e dourada no escuro.

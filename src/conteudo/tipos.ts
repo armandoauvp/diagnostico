@@ -45,8 +45,6 @@ export interface Conteudo {
     anos: string;
     marcadas: (n: number) => string;
     aoFinal: string;
-    movelTitulo: string;
-    movelSub: string;
   };
   telas: Record<Exclude<TelaId, "result">, TelaTexto>;
   intro: { destaques: [string, string][] };

@@ -32,8 +32,6 @@ export const conteudoA: Conteudo = {
     anos: "anos",
     marcadas: (n) => (n === 1 ? "1 marcada" : `${n} marcadas`),
     aoFinal: "ao final",
-    movelTitulo: "Seu plano",
-    movelSub: "Mexa no valor e veja a curva",
   },
 
   intro: {
