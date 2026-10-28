@@ -73,11 +73,13 @@ export function useVisto<T extends Element>(margem = "0px 0px -12% 0px") {
 export function useTween(alvo: number[], ms = 420) {
   const [v, setV] = useState(alvo);
   const atual = useRef(alvo);
-  const chave = alvo.map((n) => Math.round(n)).join(",");
+  const reduz = useReduzMovimento();
+  // precisão fina: a curva chega normalizada (0–1), então arredondar para inteiro a congelava
+  const chave = alvo.map((n) => n.toFixed(4)).join(",");
   useEffect(() => {
     const de = atual.current;
     const para = alvo;
-    if (de.length !== para.length) {
+    if (reduz || de.length !== para.length) {
       atual.current = para;
       setV(para);
       return;
@@ -96,6 +98,6 @@ export function useTween(alvo: number[], ms = 420) {
     raf = requestAnimationFrame(f);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chave, ms]);
+  }, [chave, ms, reduz]);
   return v;
 }

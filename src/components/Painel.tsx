@@ -13,19 +13,18 @@ import {
   Vault,
   type Icon,
 } from "@phosphor-icons/react";
-import { useId } from "react";
+import { useId, useRef } from "react";
 import type { Conteudo } from "@/conteudo/tipos";
 import { serieParcial } from "@/lib/diagnostico/calculo";
 import type { EtapaId, Respostas } from "@/lib/diagnostico/tipos";
 import { fmtCurto } from "@/lib/diagnostico/valores";
 import { useTween } from "./base";
+import { proximaEscala } from "./escala";
 
-/** Teto "redondo" (1, 2, 5 × 10^k): a curva sobe dentro da faixa e só reescala de vez em quando. */
-function teto(v: number) {
-  if (v <= 0) return 1;
-  const e = Math.pow(10, Math.floor(Math.log10(v)));
-  for (const m of [1, 2, 5, 10]) if (v <= m * e) return m * e;
-  return 10 * e;
+function useEscala(fim: number) {
+  const ref = useRef(0);
+  ref.current = proximaEscala(ref.current, fim);
+  return ref.current || 1;
 }
 
 export function MiniCurva({ r, w = 300, h = 120, className = "curva" }: { r: Respostas; w?: number; h?: number; className?: string }) {
@@ -33,11 +32,13 @@ export function MiniCurva({ r, w = 300, h = 120, className = "curva" }: { r: Res
   // sem nenhum valor ainda, desenha uma curva de exemplo bem baixinha
   const vazio = s.plano[s.plano.length - 1] <= 0;
   const base = vazio ? s.plano.map((_, t) => Math.pow(t / s.anos, 2.2) * 0.12) : s.plano;
-  const max = vazio ? 1 : teto(base[base.length - 1] * 1.08);
+  const escala = useEscala(vazio ? 0 : base[base.length - 1]);
+  const max = vazio ? 1 : escala;
   const plano = useTween(base.map((v) => v / max));
   const guard = useTween((vazio ? base.map(() => 0) : s.guardado).map((v) => v / max));
   const id = useId().replace(/:/g, "");
-  const pad = 8;
+  // na faixa do celular (40 px de altura) a margem e o ponto encolhem junto
+  const pad = Math.max(5, Math.min(8, h * 0.14));
   const X = (i: number, n: number) => pad + ((w - pad * 2) * i) / (n - 1);
   const Y = (v: number) => h - pad - (h - pad * 2) * Math.min(1, Math.max(0, v));
   const linha = (a: number[]) => a.map((v, i) => (i ? "L" : "M") + X(i, a.length).toFixed(1) + " " + Y(v).toFixed(1)).join(" ");
@@ -54,7 +55,7 @@ export function MiniCurva({ r, w = 300, h = 120, className = "curva" }: { r: Res
       <path d={area} fill={`url(#g${id})`} />
       {!vazio && <path d={linha(guard)} fill="none" stroke="var(--guardado)" strokeWidth="1.6" strokeDasharray="4 4" />}
       <path d={linha(plano)} fill="none" stroke="var(--gold)" strokeWidth={vazio ? 1.5 : 2.6} strokeLinecap="round" opacity={vazio ? 0.5 : 1} />
-      {!vazio && <circle cx={X(plano.length - 1, plano.length)} cy={Y(ult)} r="4" fill="var(--gold)" />}
+      {!vazio && <circle cx={X(plano.length - 1, plano.length)} cy={Y(ult)} r={h < 60 ? 3 : 4} fill="var(--gold)" />}
     </svg>
   );
 }
