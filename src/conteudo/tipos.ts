@@ -1,4 +1,4 @@
-import type { FaixaHero, Headline, PassoId } from "@/lib/diagnostico/calculo";
+import type { FaixaHero, Headline, PassoId, PerfilId } from "@/lib/diagnostico/calculo";
 import type { Conhecimento, Momento, Objetivo, Preocupacao, TelaId } from "@/lib/diagnostico/tipos";
 
 /*
@@ -72,6 +72,8 @@ export interface Conteudo {
   insightRotulo: string;
   resultado: {
     selo: string;
+    /** classificação no topo do resultado, como frase ("Você é um…") */
+    perfilFrase: Record<PerfilId, string>;
     tituloComNome: (nome: string) => string;
     headline: Record<Headline, string>;
     chegadaSub: string;

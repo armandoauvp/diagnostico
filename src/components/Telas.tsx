@@ -1,22 +1,6 @@
 "use client";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle,
-  EnvelopeSimple,
-  Lightbulb,
-  ListNumbers,
-  LockSimple,
-  Minus,
-  Plus,
-  ShieldCheck,
-  Target,
-  Timer,
-  User,
-  WhatsappLogo,
-} from "@phosphor-icons/react";
+import { ArrowRight, Check, CheckCircle, LockSimple, Minus, Plus, WhatsappLogo } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Conteudo, ExtrasB, Opcao, TelaTexto } from "@/conteudo/tipos";
 import { emailOk, nomeOk } from "@/lib/diagnostico/fluxo";
@@ -34,7 +18,6 @@ import {
   type CampoValor,
 } from "@/lib/diagnostico/valores";
 import { Rich } from "./base";
-import { ICONES_OPCAO } from "./icones";
 
 export function Cabecalho({ t }: { t: TelaTexto }) {
   return (
@@ -63,7 +46,7 @@ export function Navegacao({
     <div className="nav">
       {mostraVoltar && (
         <button type="button" className="btn btn-fantasma" onClick={voltar}>
-          <ArrowLeft size={18} weight="bold" /> Voltar
+          Voltar
         </button>
       )}
       <button type="button" className="btn btn-primario" onClick={avancar} disabled={!pode}>
@@ -77,22 +60,11 @@ export function Abaixo({ insight, confianca, rotulo }: { insight?: string; confi
   return (
     <>
       {insight && (
-        <div className="insight" role="note">
-          <span className="lamp">
-            <Lightbulb size={19} weight="duotone" />
-          </span>
-          <p>
-            <span className="rot">{rotulo}</span>
-            <Rich html={insight} />
-          </p>
-        </div>
-      )}
-      {confianca && (
-        <p className="confianca">
-          <i />
-          <Rich html={confianca} />
+        <p className="insight" role="note">
+          <b className="rot">{rotulo}</b> <Rich html={insight} />
         </p>
       )}
+      {confianca && <Rich as="p" className="confianca" html={confianca} />}
     </>
   );
 }
@@ -103,26 +75,18 @@ export function Opcoes<V extends string>({
   opcoes,
   selecionados,
   multi,
-  tiles,
   onEscolha,
   rotulo,
 }: {
   opcoes: Opcao<V>[];
   selecionados: V[];
   multi?: boolean;
-  tiles?: boolean;
   onEscolha: (v: V) => void;
   rotulo: string;
 }) {
-  const [pop, setPop] = useState<V | null>(null);
   return (
-    <div
-      className={"opcoes" + (tiles ? " tiles" : "") + (opcoes.length >= 6 ? " duas" : "")}
-      role={multi ? "group" : "radiogroup"}
-      aria-label={rotulo}
-    >
+    <div className={"opcoes" + (opcoes.length >= 6 ? " duas" : "")} role={multi ? "group" : "radiogroup"} aria-label={rotulo}>
       {opcoes.map((o) => {
-        const Ico = ICONES_OPCAO[o.val];
         const sel = selecionados.includes(o.val);
         return (
           <button
@@ -130,14 +94,9 @@ export function Opcoes<V extends string>({
             type="button"
             role={multi ? "checkbox" : "radio"}
             aria-checked={sel}
-            className={"opcao" + (multi ? " multi" : "") + (sel ? " sel" : "") + (pop === o.val ? " pop" : "")}
-            onClick={() => {
-              setPop(o.val);
-              onEscolha(o.val);
-            }}
-            onAnimationEnd={() => setPop(null)}
+            className={"opcao" + (multi ? " multi" : "") + (sel ? " sel" : "")}
+            onClick={() => onEscolha(o.val)}
           >
-            <span className="ico">{Ico && <Ico size={tiles ? 26 : 22} weight={sel ? "fill" : "duotone"} />}</span>
             <span className="txt">
               <span className="tt">{o.titulo}</span>
               {o.apoio && <span className="ap">{o.apoio}</span>}
@@ -153,19 +112,14 @@ export function Opcoes<V extends string>({
 }
 
 export function Destaques({ itens }: { itens: [string, string][] }) {
-  const icones = [ListNumbers, Timer, Target];
   return (
-    <div className="destaques">
-      {itens.map(([b, s], i) => {
-        const I = icones[i] ?? Target;
-        return (
-          <span key={i}>
-            <I size={18} weight="duotone" />
-            <b>{b}</b> {s}
-          </span>
-        );
-      })}
-    </div>
+    <p className="destaques">
+      {itens.map(([b, s], i) => (
+        <span key={i}>
+          <b>{b}</b> {s}
+        </span>
+      ))}
+    </p>
   );
 }
 
@@ -206,29 +160,12 @@ function Faixa({
   );
 }
 
-/** Dá um pulinho no número a cada mudança. */
-function useBump(dep: unknown) {
-  const [b, setB] = useState(false);
-  const primeiro = useRef(true);
-  useEffect(() => {
-    if (primeiro.current) {
-      primeiro.current = false;
-      return;
-    }
-    setB(true);
-    const t = setTimeout(() => setB(false), 270);
-    return () => clearTimeout(t);
-  }, [dep]);
-  return b;
-}
-
 export function SliderIdade({ idade, onIdade, unidade, extra }: { idade: number; onIdade: (n: number) => void; unidade: string; extra?: ReactNode }) {
   const t = (idade - IDADE.min) / (IDADE.max - IDADE.min);
-  const bump = useBump(idade);
   const set = (n: number) => onIdade(Math.max(IDADE.min, Math.min(IDADE.max, Math.round(n))));
   return (
     <div className="valor">
-      <div className={"leitura" + (bump ? " bump" : "")} aria-live="polite">
+      <div className="leitura" aria-live="polite">
         <span className="num" style={{ width: "auto" }}>
           {idade}
         </span>
@@ -270,7 +207,6 @@ export function SliderDinheiro({
   const max = LIMITES[campo].max;
   const [texto, setTexto] = useState<string | null>(null);
   const [t, setT] = useState(() => paraPosicao(campo, valor));
-  const bump = useBump(valor);
 
   // quando o valor muda por fora (atalho, −/+), a posição acompanha
   const ultimo = useRef(valor);
@@ -289,7 +225,7 @@ export function SliderDinheiro({
   const exibido = texto ?? fmtNum(valor);
   return (
     <div className="valor">
-      <div className={"leitura" + (bump && texto === null ? " bump" : "")}>
+      <div className="leitura">
         <span className="cur">R$</span>
         <input
           className="num"
@@ -382,7 +318,6 @@ export function FormContato({
       )}
       <div className="campo">
         <label className={"entrada" + (nomeOk(nome) ? " ok" : "")}>
-          <User size={20} />
           <span className="sr">{c.contato.nome}</span>
           <input
             ref={nomeRef}
@@ -432,7 +367,6 @@ export function FormContato({
       </div>
       <div className="campo">
         <label className={"entrada" + (emailOk(email) ? " ok" : "")}>
-          <EnvelopeSimple size={20} />
           <span className="sr">{c.contato.email}</span>
           <input
             type="email"
@@ -446,10 +380,7 @@ export function FormContato({
           {emailOk(email) && <CheckCircle className="okv" size={20} weight="fill" />}
         </label>
       </div>
-      <div className="selo">
-        <ShieldCheck size={20} weight="duotone" />
-        <Rich html={c.contato.selo} />
-      </div>
+      <Rich as="p" className="selo" html={c.contato.selo} />
     </div>
   );
 }

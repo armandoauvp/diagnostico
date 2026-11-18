@@ -64,6 +64,7 @@ export const PERFIL_NOMES = {
   transicao: "Em transição para a renda",
   gerador: "Gerador de renda",
 };
+export type PerfilId = keyof typeof PERFIL_NOMES;
 
 export function calcular(data: Respostas, p: Premissas = PREMISSAS): Resultado {
   const iNom = Math.pow(1 + p.ret, 1 / 12) - 1;

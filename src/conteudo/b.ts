@@ -25,7 +25,8 @@ const telas: Telas = {
   objetivo: {
     ...A.telas.objetivo,
     sub: "Responda algumas perguntas e veja, em números, quanto patrimônio e quanta renda o seu dinheiro pode gerar.",
-    confianca: "A AUVP é a maior escola de investimento do país.",
+    // a linha de confiança saiu (correções de 16/11)
+    confianca: "",
   },
   idade: { ...A.telas.idade },
   aporte: {
@@ -111,7 +112,7 @@ export const conteudoB: Conteudo = {
   contato: {
     ...A.contato,
     erroWhats: "Confira o número, parece incompleto.",
-    selo: "Dados criptografados, tratados conforme a LGPD e nunca vendidos. E se o que você contratar com a gente não fizer sentido, devolvemos 100% do seu dinheiro.",
+    selo: "Dados criptografados, tratados conforme a LGPD e nunca vendidos. Se você não ficar satisfeito, nós devolvemos 100% do seu dinheiro após a emissão do certificado!",
   },
 
   calculando: {
@@ -227,7 +228,7 @@ export const conteudoB: Conteudo = {
     cta: {
       ...r.cta,
       ponte: "Fale com um especialista pelo WhatsApp para colocar o plano em prática.",
-      nota: "Seu especialista já recebe este diagnóstico completo, então você não repete nada. E se o que você contratar não fizer sentido, <b>devolvemos 100% do seu dinheiro</b>.",
+      nota: "Seu especialista já recebe este diagnóstico completo, então você não repete nada. Se você não ficar satisfeito, nós devolvemos <b>100% do seu dinheiro</b> após a emissão do certificado!",
     },
     saida: {
       ...r.saida,

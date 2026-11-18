@@ -37,7 +37,23 @@ export function TemaBotao() {
   );
 }
 
-export function Topo({ contador, idx, calculando, nome }: { contador: string; idx: number; calculando?: boolean; nome: string }) {
+export function Topo({
+  contador,
+  idx,
+  calculando,
+  nome,
+  onIr,
+  pulado,
+}: {
+  contador: string;
+  idx: number;
+  calculando?: boolean;
+  nome: string;
+  /** volta para uma etapa já passada (clique na barra de progresso) */
+  onIr?: (i: number) => void;
+  /** etapas que o fluxo pulou e por isso não aceitam clique */
+  pulado?: (i: number) => boolean;
+}) {
   const total = FLOW.length - 1;
   const [a, b] = contador.split(" / ");
   return (
@@ -57,11 +73,28 @@ export function Topo({ contador, idx, calculando, nome }: { contador: string; id
         </div>
       </div>
       {FLOW[idx] !== "result" && (
-        <div className={"trilho" + (calculando ? " cheio" : "")} aria-hidden>
-          {Array.from({ length: total }, (_, i) => (
-            <i key={i} className={i < idx ? "feito" : i === idx ? "atual" : ""} />
-          ))}
-        </div>
+        <nav className={"trilho" + (calculando ? " cheio" : "")} aria-label="Progresso">
+          {Array.from({ length: total }, (_, i) => {
+            const cls = i < idx ? "feito" : i === idx ? "atual" : "";
+            const volta = !calculando && onIr && i < idx && !pulado?.(i);
+            return volta ? (
+              <button
+                key={i}
+                type="button"
+                className="seg"
+                onClick={() => onIr(i)}
+                aria-label={`Voltar para a etapa ${i + 1}`}
+                title={`Voltar para a etapa ${i + 1}`}
+              >
+                <i className={cls} />
+              </button>
+            ) : (
+              <span key={i} className="seg" aria-current={i === idx ? "step" : undefined}>
+                <i className={cls} />
+              </span>
+            );
+          })}
+        </nav>
       )}
     </header>
   );

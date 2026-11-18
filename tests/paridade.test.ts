@@ -50,8 +50,9 @@ describe("paridade com a v6", () => {
       const t = montarTextos(res, conteudoA, d.nome, d.objetivo);
       const ctx = JSON.stringify(d);
 
-      expect(t.perfil, ctx).toBe(o.plabel);
-      expect(t.heroLabel, ctx).toBe(o.heroLabel);
+      // a classificação e o rótulo do número mudaram de texto nas correções de 16/11; a regra continua a da v6
+      expect(res.perfilNome, ctx).toBe(o.plabel);
+      expect(t.heroLabel, ctx).toBe(o.heroLabel.replace(/ em 20 anos$/, " em 20 anos investindo"));
       expect(t.heroNota, ctx).toBe(o.heroNote);
       expect(res.hero.valor, ctx).toBeCloseTo(o.heroBig, 6);
       expect(t.segundo?.valor ?? null, ctx).toBe(o.second?.value ?? null);

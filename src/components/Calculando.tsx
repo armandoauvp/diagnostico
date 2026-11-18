@@ -56,10 +56,7 @@ export function Calculando({ c, onFim }: { c: Conteudo; onFim: () => void }) {
           </div>
         ))}
       </div>
-      <p className="confianca">
-        <i />
-        <Rich html={k.confianca} />
-      </p>
+      <Rich as="p" className="confianca" html={k.confianca} />
     </section>
   );
 }

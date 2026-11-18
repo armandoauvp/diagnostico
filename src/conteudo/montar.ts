@@ -1,4 +1,4 @@
-import { primeiroNome, type Resultado } from "@/lib/diagnostico/calculo";
+import { PERFIL_NOMES, primeiroNome, type PerfilId, type Resultado } from "@/lib/diagnostico/calculo";
 import type { Objetivo } from "@/lib/diagnostico/tipos";
 import { fmt } from "@/lib/diagnostico/valores";
 import { selicTxt } from "./a";
@@ -43,7 +43,7 @@ export function montarTextos(res: Resultado, c: Conteudo, nome: string, objetivo
 
   return {
     titulo: primeiro ? r.tituloComNome(primeiro) : r.headline[res.headline],
-    perfil: res.perfilNome,
+    perfil: perfilFrase(res.perfilNome, r.perfilFrase),
     heroLabel: faixa.label,
     heroNota: faixa.nota(res.hero.idadeFim, fmt(res.hero.apoio)),
     segundo: res.hero.segundo !== null ? { label: r.segundoLabel, valor: res.hero.segundo } : null,
@@ -72,6 +72,12 @@ export function montarTextos(res: Resultado, c: Conteudo, nome: string, objetivo
         }
       : null,
   };
+}
+
+/** O cálculo devolve o nome do perfil; a frase vem da variante. */
+function perfilFrase(nome: string, frases: Record<PerfilId, string>) {
+  const id = (Object.keys(PERFIL_NOMES) as PerfilId[]).find((k) => PERFIL_NOMES[k] === nome);
+  return id ? frases[id] : escHtml(nome);
 }
 
 export type Textos = ReturnType<typeof montarTextos>;

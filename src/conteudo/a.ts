@@ -2,8 +2,11 @@ import { PREMISSAS } from "@/lib/diagnostico/config";
 import type { Conteudo } from "./tipos";
 
 /*
- * Versão A: os textos de hoje (v6), sem mudanças.
- * Única exceção: resultado.chegadaSub, que citava o "toque para revelar".
+ * Versão A: os textos de hoje (v6).
+ * Exceções: resultado.chegadaSub, que citava o "toque para revelar", e as
+ * correções de 16/11/2026 (PDF "Correções Diagnóstico Financeiro"), que valem
+ * para as duas versões: confiança das telas 1 e 2, "financeiro", "investindo",
+ * frase do perfil e texto da devolução.
  */
 
 export const selicTxt = (Math.round(PREMISSAS.ret * 10000) / 100).toString().replace(".", ",");
@@ -38,7 +41,7 @@ export const conteudoA: Conteudo = {
     destaques: [
       ["9", "etapas rápidas"],
       ["~2 min", "para concluir"],
-      ["Seu plano", "ao final"],
+      ["Seu plano financeiro", "ao final"],
     ],
   },
 
@@ -50,13 +53,13 @@ export const conteudoA: Conteudo = {
     objetivo: {
       titulo: "O que o seu dinheiro precisa fazer por você?",
       sub: "Toda boa decisão de dinheiro começa pela vida que você quer. Responda algumas perguntas e veja, em números, até onde o seu caminho leva hoje — e o que muda a rota.",
-      confianca: "AUVP é avaliada a <b>melhor escola de investimentos do Brasil</b>.",
+      confianca: "",
       botao: "Começar meu diagnóstico",
     },
     idade: {
       titulo: "Quantos anos você tem?",
       sub: "É a variável que mais pesa no seu plano: define quanto tempo os juros compostos têm para trabalhar a seu favor.",
-      confianca: "Cada resposta afina o <b>seu número</b>.",
+      confianca: "",
       insight:
         "Pelos juros compostos, cada década de antecedência pode mais que dobrar o resultado final. <b>Tempo costuma pesar mais do que o tamanho do aporte.</b>",
     },
@@ -165,7 +168,7 @@ export const conteudoA: Conteudo = {
     whats: "WhatsApp com DDD",
     email: "E-mail",
     erroWhats: "Confira o número — parece incompleto.",
-    selo: "Dados criptografados, tratados conforme a <b>LGPD</b> e nunca vendidos. E tudo que oferecemos tem <b>garantia incondicional: 100% do dinheiro de volta</b> em caso de insatisfação.",
+    selo: "Dados criptografados, tratados conforme a <b>LGPD</b> e nunca vendidos. Se você não ficar satisfeito, nós devolvemos <b>100% do seu dinheiro</b> após a emissão do certificado!",
     paisOutro: "Outro",
   },
 
@@ -184,6 +187,12 @@ export const conteudoA: Conteudo = {
 
   resultado: {
     selo: "Diagnóstico concluído",
+    perfilFrase: {
+      patrimonial: "Você tem um <b>perfil patrimonial</b>",
+      construtor: "Você é um <b>construtor de patrimônio</b>",
+      transicao: "Você está <b>em transição para a renda</b>",
+      gerador: "Você é um <b>gerador de renda</b>",
+    },
     tituloComNome: (nome) => `${nome}, aqui está o seu plano`,
     headline: {
       privado: "Seu retrato patrimonial",
@@ -196,7 +205,7 @@ export const conteudoA: Conteudo = {
     chegadaSub: "Está tudo aqui, em uma página só. Desça no seu ritmo.",
     hero: {
       menos40: {
-        label: "Patrimônio que você pode construir em 20 anos",
+        label: "Patrimônio que você pode construir em 20 anos investindo",
         nota: (idadeFim, renda) =>
           `Aos ${idadeFim}, são cerca de <b>${renda} por mês</b> sem encostar no principal — a liberdade de decidir se ainda <i>quer</i> trabalhar.`,
       },
@@ -358,7 +367,7 @@ export const conteudoA: Conteudo = {
       ponte: "O plano está pronto. O único passo que ele não dá sozinho é o primeiro — e esse é seu.",
       especialista: (nome) => `Quem te recebe: ${nome}`,
       botao: "Seguir o plano com um especialista",
-      nota: "Seu especialista já recebe este diagnóstico completo — você não repete nada. Conversa sem compromisso, com <b>garantia de 100% do dinheiro de volta</b> no que decidir contratar.",
+      nota: "Seu especialista já recebe este diagnóstico completo — você não repete nada. Conversa sem compromisso. Se você não ficar satisfeito, nós devolvemos <b>100% do seu dinheiro</b> após a emissão do certificado!",
     },
     imprensa: "AUVP na imprensa",
     premio: "Eleita <b>2 vezes a melhor consultoria de investimentos do Brasil</b> pelo BTG Pactual.",

@@ -11,7 +11,6 @@ import { alternaPreocupacao, contador, etapaValida, FLOW, mover, RESPOSTAS_INICI
 import { PRESETS } from "@/lib/diagnostico/presets";
 import type { EtapaId, Preocupacao, Respostas, Variante } from "@/lib/diagnostico/tipos";
 import { Calculando } from "./Calculando";
-import { Painel } from "./Painel";
 import { Resultado } from "./Resultado";
 import { Abaixo, Cabecalho, Destaques, FormContato, Navegacao, Opcoes, SliderDinheiro, SliderIdade } from "./Telas";
 import { Topo } from "./Topo";
@@ -23,7 +22,6 @@ export function Diagnostico({ variante }: { variante: Variante }) {
   const [r, setR] = useState<Respostas>(RESPOSTAS_INICIAIS);
   const [dir, setDir] = useState<1 | -1>(1);
   const [calculando, setCalculando] = useState(false);
-  const [respondidas, setRespondidas] = useState<Set<EtapaId>>(new Set());
   const [revisao, setRevisao] = useState(false);
   const autoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -40,17 +38,12 @@ export function Diagnostico({ variante }: { variante: Variante }) {
     const q = new URLSearchParams(window.location.search);
     const e = q.get("etapa") as EtapaId | null;
     const p = PRESETS.find((x) => x.id === q.get("perfil"));
-    if (p) {
-      atualiza(() => p.r);
-      setRespondidas(new Set(FLOW));
-    }
+    if (p) atualiza(() => p.r);
     if (e && FLOW.includes(e)) {
       setIdx(FLOW.indexOf(e));
       setRevisao(true);
     }
   }, []);
-
-  const marca = useCallback((e: EtapaId) => setRespondidas((s) => (s.has(e) ? s : new Set(s).add(e))), []);
 
   // cada tela vista vira evento de funil
   useEffect(() => {
@@ -80,10 +73,7 @@ export function Diagnostico({ variante }: { variante: Variante }) {
       if (autoRef.current) clearTimeout(autoRef.current);
       const atual = rRef.current;
       if (d > 0 && !etapaValida(FLOW[idx], atual)) return;
-      if (d > 0) {
-        track("step_complete", { step: FLOW[idx] });
-        marca(FLOW[idx]);
-      }
+      if (d > 0) track("step_complete", { step: FLOW[idx] });
       const m = mover(idx, d, atual);
       if (d > 0 && FLOW[idx] === "contato" && FLOW[m.idx] === "result") {
         const resultado = calcular(m.respostas);
@@ -96,8 +86,21 @@ export function Diagnostico({ variante }: { variante: Variante }) {
       setDir(d);
       setIdx(m.idx);
     },
-    [idx, marca, revisao, variante],
+    [idx, revisao, variante],
   );
+
+  // clique na barra de progresso: só volta
+  const irPara = useCallback(
+    (j: number) => {
+      if (autoRef.current) clearTimeout(autoRef.current);
+      if (j >= idx) return;
+      setDir(-1);
+      setIdx(j);
+    },
+    [idx],
+  );
+  // quem respondeu "Ninguém ainda" pulou a tela de nível
+  const pulado = (i: number) => FLOW[i] === "conhecimento" && r.momento === "comecando";
 
   // Enter avança (fora do formulário, que trata o próprio Enter)
   useEffect(() => {
@@ -113,7 +116,6 @@ export function Diagnostico({ variante }: { variante: Variante }) {
 
   function escolheUnica<K extends "objetivo" | "momento" | "conhecimento">(k: K, v: Respostas[K]) {
     atualiza((x) => ({ ...x, [k]: v }));
-    marca(etapa);
     if (recursos.autoAvanco) {
       if (autoRef.current) clearTimeout(autoRef.current);
       autoRef.current = setTimeout(() => ir(1), 420);
@@ -122,7 +124,6 @@ export function Diagnostico({ variante }: { variante: Variante }) {
 
   function refazer() {
     atualiza(() => RESPOSTAS_INICIAIS);
-    setRespondidas(new Set());
     setCalculando(false);
     setRevisao(false);
     setDir(-1);
@@ -162,7 +163,7 @@ export function Diagnostico({ variante }: { variante: Variante }) {
   if (tela === "objetivo") {
     corpo = (
       <>
-        <Opcoes opcoes={c.opcoes.objetivo} selecionados={r.objetivo ? [r.objetivo] : []} tiles rotulo={t.titulo} onEscolha={(v) => escolheUnica("objetivo", v)} />
+        <Opcoes opcoes={c.opcoes.objetivo} selecionados={r.objetivo ? [r.objetivo] : []} rotulo={t.titulo} onEscolha={(v) => escolheUnica("objetivo", v)} />
         <Navegacao voltar={voltar} avancar={avancar} rotulo={rotuloBotao} pode={pode} mostraVoltar={false} />
         <Destaques itens={c.intro.destaques} />
       </>
@@ -174,10 +175,7 @@ export function Diagnostico({ variante }: { variante: Variante }) {
         <SliderIdade
           idade={r.idade}
           unidade={c.valores.unidadeIdade}
-          onIdade={(n) => {
-            atualiza((x) => ({ ...x, idade: n }));
-            marca("idade");
-          }}
+          onIdade={(n) => atualiza((x) => ({ ...x, idade: n }))}
           extra={
             recursos.horizonteIdade && c.extras ? <Rich className="horizonte" html={c.extras.horizonte(anos, r.idade + anos)} /> : null
           }
@@ -193,10 +191,7 @@ export function Diagnostico({ variante }: { variante: Variante }) {
           key={campo}
           campo={campo}
           valor={r[campo]}
-          onValor={(v) => {
-            atualiza((x) => ({ ...x, [campo]: v }));
-            marca(campo);
-          }}
+          onValor={(v) => atualiza((x) => ({ ...x, [campo]: v }))}
           pontas={c.valores.pontas[campo]}
           dica={c.valores.dica}
           atalhos={recursos.atalhosValor ? c.extras?.atalhos[campo] : undefined}
@@ -214,10 +209,7 @@ export function Diagnostico({ variante }: { variante: Variante }) {
           multi
           selecionados={r.concerns}
           rotulo={t.titulo}
-          onEscolha={(v) => {
-            atualiza((x) => ({ ...x, concerns: alternaPreocupacao(x.concerns, v, ops.map((o) => o.val)) }));
-            marca("concerns");
-          }}
+          onEscolha={(v) => atualiza((x) => ({ ...x, concerns: alternaPreocupacao(x.concerns, v, ops.map((o) => o.val)) }))}
         />
         <Navegacao voltar={voltar} avancar={avancar} rotulo={rotuloBotao} pode={pode} />
       </>
@@ -261,8 +253,8 @@ export function Diagnostico({ variante }: { variante: Variante }) {
 
   return (
     <>
-      <Topo nome={c.marca.nome} contador={contador(idx)} idx={idx} />
-      <main className="palco com-painel">
+      <Topo nome={c.marca.nome} contador={contador(idx)} idx={idx} onIr={irPara} pulado={pulado} />
+      <main className="palco">
         <div className="coluna">
           <section key={tela} className={"card etapa" + (dir < 0 ? " volta" : "")} aria-labelledby="titulo-etapa">
             <Cabecalho t={t} />
@@ -270,7 +262,6 @@ export function Diagnostico({ variante }: { variante: Variante }) {
           </section>
           <Abaixo key={"ab-" + tela} insight={t.insight} confianca={t.confianca} rotulo={c.insightRotulo} />
         </div>
-        <Painel c={c} r={r} respondidas={respondidas} />
       </main>
       {(revisao || MODO_REVISAO) && <BadgeVariante variante={variante} />}
     </>

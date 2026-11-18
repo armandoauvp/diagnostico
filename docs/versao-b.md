@@ -55,11 +55,25 @@ Ficou de fora de propósito: as menções ao BTG ("Eleita 2x a melhor consultori
 
 | Recurso | O que faz | Por quê |
 |---|---|---|
-| Avanço automático | Nas perguntas de escolha única (objetivo, quem cuida, nível), a tela avança sozinha 0,4 s depois de marcar. O botão continua ali | Um toque a menos em 3 das 9 telas. É o padrão de quiz que prende |
-| Atalhos de valor | Botões R$ 500, R$ 1 mil, R$ 2 mil… abaixo do slider, nas telas de dinheiro | No celular, arrastar um slider logarítmico até um valor exato é difícil. O atalho resolve em um toque, e o slider continua para ajuste fino |
+| ~~Avanço automático~~ | Desligado nas correções de 16/11 | A pessoa às vezes clicava antes de ler ou escolher e a tela já avançava. Agora só o Continuar avança |
+| ~~Atalhos de valor~~ | Desligados nas correções de 16/11 | Voltou a instrução "Arraste, use − e +, ou toque no valor acima para digitar", como na A |
 | Horizonte na idade | "Seu plano vai olhar para os próximos 20 anos, até os 55." | Mostra na hora o efeito da resposta (a regra de 20 ou 15 anos já existe no cálculo) e dá sentido ao "é a variável que mais pesa" |
-| Prévia trancada no contato | Lista o que já está pronto (seu número, os dois futuros, o plano, os números), com um cadeado | Reforça o "Seu plano está calculado e protegido": a pessoa vê o que vai ganhar ao preencher, no lugar do antigo borrado do resultado |
+| ~~Prévia trancada no contato~~ | Desligada nas correções de 16/11 | Saiu o bloco "Já está pronto no seu plano" da tela 9 |
 | Fechamento sem redirecionamento | No celular, sai a contagem de 30 s que abria o WhatsApp sozinho. No lugar, depois que a pessoa passa pelos números, sobe um convite ("Quando quiser, o seu especialista está a um toque.") com "Falar agora" e um ✕ | Abrir outro app sem a pessoa pedir corta a leitura justamente de quem está engajado. O convite aparece no momento de maior interesse e não tira ninguém da página. O aviso de saída do computador continua |
+
+Os recursos desligados continuam no código. Cada um volta mudando a chave em `src/conteudo/variantes.ts`.
+
+## Correções de 16/11 (A e B)
+
+Vieram do PDF "Correções Diagnóstico Financeiro" e valem para as duas versões:
+
+- Saiu o painel lateral "Seu plano". A pergunta fica centralizada, e o contador do topo ficou maior.
+- A barra de progresso do topo é clicável e volta para qualquer pergunta já passada. Para quem respondeu "Ninguém ainda", a tela de nível fica travada, porque o fluxo a pulou.
+- Tela 1: saiu a linha de confiança. O destaque passou para "Seu plano financeiro ao final".
+- Tela 2: saiu "Cada resposta afina o seu número."
+- Resultado: o título do número ficou "…construir em 20 anos investindo". A classificação virou uma frase ("Você é um construtor de patrimônio"), em `resultado.perfilFrase`.
+- Resultado no tema escuro: o quadro do número e o do botão final ficam claros sobre o preto.
+- Devolução no selo da tela 9 e na nota do botão final: "Se você não ficar satisfeito, nós devolvemos 100% do seu dinheiro após a emissão do certificado!"
 
 ## Eventos novos (só na B)
 

@@ -24,6 +24,7 @@ export const VARIANTES: Record<Variante, { conteudo: Conteudo; recursos: Recurso
   },
   b: {
     conteudo: conteudoB,
-    recursos: { autoAvanco: true, atalhosValor: true, horizonteIdade: true, previaContato: true, fechamentoSuave: true },
+    // avanço automático, atalhos de valor e prévia do contato saíram nas correções de 16/11
+    recursos: { autoAvanco: false, atalhosValor: false, horizonteIdade: true, previaContato: false, fechamentoSuave: true },
   },
 };

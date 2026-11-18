@@ -1,19 +1,6 @@
 "use client";
 
-import {
-  ArrowCounterClockwise,
-  ChartLineUp,
-  CheckCircle,
-  Hourglass,
-  ListChecks,
-  Medal,
-  Newspaper,
-  Rows,
-  ShieldCheck,
-  WhatsappLogo,
-  X,
-  XCircle,
-} from "@phosphor-icons/react";
+import { CheckCircle, WhatsappLogo, X, XCircle } from "@phosphor-icons/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Textos } from "@/conteudo/montar";
 import type { Conteudo } from "@/conteudo/tipos";
@@ -24,13 +11,9 @@ import { track } from "@/lib/diagnostico/envio";
 import { fmt, fmtCurto } from "@/lib/diagnostico/valores";
 import { Rich, useContagem, useVisto } from "./base";
 
+/** Bloco do resultado. Aparece parado: só o número tem entrada animada. */
 function Revela({ children, className = "", as: Tag = "section" }: { children: ReactNode; className?: string; as?: "section" | "div" }) {
-  const [ref, visto] = useVisto<HTMLElement>();
-  return (
-    <Tag ref={ref as never} className={`revela ${visto ? "visto" : ""} ${className}`}>
-      {children}
-    </Tag>
-  );
+  return <Tag className={className}>{children}</Tag>;
 }
 
 const ehCelular = () =>
@@ -93,7 +76,6 @@ function Grafico({ c, res }: { c: Conteudo; res: Res }) {
         <path d={path(guardado)} fill="none" stroke="var(--guardado)" strokeWidth="2" strokeDasharray="5 5" />
         <path className="l-plano" pathLength={1} d={path(plano)} fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         <g className="ponto">
-          <circle className="halo" cx={Xc(N)} cy={Yc(plano[N])} r="5" fill="var(--gold)" />
           <circle cx={Xc(N)} cy={Yc(plano[N])} r="5.5" fill="var(--gold)" stroke="var(--surface)" strokeWidth="2" />
         </g>
         <text x={padL} y={H - 6} fontSize="12" fill="var(--ink-3)" fontFamily="var(--font-ui)">
@@ -122,11 +104,7 @@ function Hero({ c, res, t }: { c: Conteudo; res: Res; t: Textos }) {
   const v2 = useContagem(t.segundo?.valor ?? 0, !!t.segundo);
   return (
     <section className="hero escuro">
-      <span className="hero-brilho" aria-hidden />
-      <span className="perfil">
-        <ChartLineUp size={14} weight="bold" />
-        {t.perfil}
-      </span>
+      <Rich as="p" className="perfil" html={t.perfil} />
       <div className="rot">{t.heroLabel}</div>
       <div className="grande" aria-label={fmt(res.hero.valor)}>
         {fmt(v)}
@@ -141,10 +119,7 @@ function Hero({ c, res, t }: { c: Conteudo; res: Res; t: Textos }) {
       )}
       <Rich as="p" className="nota" html={t.heroNota} />
       {t.espera && (
-        <div className="espera">
-          <Hourglass size={18} weight="duotone" />
-          <Rich html={t.espera} />
-        </div>
+        <Rich as="p" className="espera" html={t.espera} />
       )}
     </section>
   );
@@ -155,12 +130,7 @@ function Futuros({ c, res, t }: { c: Conteudo; res: Res; t: Textos }) {
   const k = c.resultado.comparacao;
   return (
     <Revela className="card bloco">
-      <div className="bloco-h">
-        <span className="ic">
-          <ChartLineUp size={20} weight="duotone" />
-        </span>
-        <h2>{t.comparacao.titulo}</h2>
-      </div>
+      <h2 className="bloco-h">{t.comparacao.titulo}</h2>
       <div className="futuros">
         <div className="futuro com">
           <div className="cab">
@@ -194,12 +164,7 @@ function Futuros({ c, res, t }: { c: Conteudo; res: Res; t: Textos }) {
 function Plano({ c, t }: { c: Conteudo; t: Textos }) {
   return (
     <Revela className="card bloco">
-      <div className="bloco-h">
-        <span className="ic">
-          <ListChecks size={20} weight="duotone" />
-        </span>
-        <h2>{c.resultado.planoTitulo}</h2>
-      </div>
+      <h2 className="bloco-h">{c.resultado.planoTitulo}</h2>
       <Rich as="p" className="leadin" html={t.leadin} />
       {t.callout && (
         <div className="callout">
@@ -215,12 +180,7 @@ function Plano({ c, t }: { c: Conteudo; t: Textos }) {
             <h3>{p.titulo}</h3>
             {p.essencia && <p className="ess">{p.essencia}</p>}
             <Rich as="p" className="corpo" html={p.texto} />
-            {p.selo && (
-              <span className="garantia">
-                <ShieldCheck size={15} weight="fill" />
-                {c.resultado.seloPasso}
-              </span>
-            )}
+            {p.selo && <p className="garantia">{c.resultado.seloPasso}</p>}
           </li>
         ))}
       </ol>
@@ -234,12 +194,7 @@ function Numeros({ c, res, t }: { c: Conteudo; res: Res; t: Textos }) {
   const valoresIm = res.imovel ? [res.imovel.aluguel, res.imovel.liquido, res.imovel.investido] : [];
   return (
     <Revela className="card bloco">
-      <div className="bloco-h">
-        <span className="ic">
-          <Rows size={20} weight="duotone" />
-        </span>
-        <h2>{c.resultado.numerosTitulo}</h2>
-      </div>
+      <h2 className="bloco-h">{c.resultado.numerosTitulo}</h2>
       <div ref={ref}>
         {res.split && t.split && (
           <>
@@ -426,17 +381,6 @@ export function Resultado({
       </div>
 
       <div className="chegada etapa">
-        <span className="chegada-selo">
-          <span className="ck">
-            <CheckCircle size={18} weight="fill" />
-          </span>
-          {r.selo}
-          <span className="faiscas" aria-hidden>
-            {[[-60, -34], [64, -30], [-46, 30], [52, 34], [0, -46], [-80, 4], [84, 6]].map(([x, y], i) => (
-              <i key={i} style={{ ["--x" as string]: x + "px", ["--y" as string]: y + "px", animationDelay: 0.35 + i * 0.04 + "s" }} />
-            ))}
-          </span>
-        </span>
         <h1>{t.titulo}</h1>
         {r.chegadaSub && <p>{r.chegadaSub}</p>}
       </div>
@@ -448,14 +392,10 @@ export function Resultado({
       <span id="numerosFim" />
 
       {t.perdaFinal && (
-        <Revela as="div" className="perda">
-          <Hourglass size={20} weight="duotone" />
-          <Rich html={t.perdaFinal} />
-        </Revela>
+        <Rich as="p" className="perda" html={t.perdaFinal} />
       )}
 
       <Revela className="cta escuro">
-        <span className="hero-brilho" aria-hidden />
         <h2>{r.cta.titulo}</h2>
         <p className="ponte">{r.cta.ponte}</p>
         {(SPECIALIST.nome || SPECIALIST.foto) && (
@@ -476,19 +416,16 @@ export function Resultado({
         <div className="imprensa-links">
           {PRESS.map((p) => (
             <a key={p.name} href={p.url} target="_blank" rel="noopener">
-              <Newspaper size={15} /> {p.name}
+              {p.name}
             </a>
           ))}
         </div>
-        <div className="premio">
-          <Medal size={22} weight="duotone" />
-          <Rich html={r.premio} />
-        </div>
+        <Rich as="p" className="premio" html={r.premio} />
       </Revela>
 
       <p className="aviso">{r.aviso}</p>
       <button type="button" className="refazer" onClick={onRefazer}>
-        <ArrowCounterClockwise size={15} /> {r.refazer}
+        {r.refazer}
       </button>
 
       <div className={"fixo" + (fixo ? " on" : "")}>
@@ -504,9 +441,6 @@ export function Resultado({
         onClick={(e) => e.target === e.currentTarget && setSaida(false)}
       >
         <div className="saida escuro">
-          <span className="ic">
-            <WhatsappLogo size={26} weight="duotone" />
-          </span>
           <h3 id="saidaTitulo">{r.saida.titulo}</h3>
           <p>{r.saida.texto}</p>
           <BotaoWa rotulo={r.saida.botao} onClick={() => track("exit_intent_cta")} />
